@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="موقع لحساب اوقات قيمة زكاة المال و التوقيت المستحق فيه دفعها">
+        <title>موقع زكاتي-انشاء حساب</title>
+        <link rel="stylesheet" href="{%static 'zakah1/css/sign up.css'%}"/>
+        <link rel="stylesheet" href="sign up.css"/>
+    </head>
+    <body>
+        <header>
+            {وَمَا أَنْفَقْتُمْ مِنْ شَيْءٍ فَهُوَ يُخْلِفُهُ وَهُوَ خَيْرُ الرَّازِقِينَ}
+        </header>
+        <section>
+            <form method="post" action="#" target="_self" autocomplete="off" name="sign-up-f">
+                {% csrf_token %}
+                <input type="text" placeholder="الاسم الاول" name="fname"><br>
+                <input type="text" placeholder="اسم العائلة" name="lname"><br>
+                <input type="text" placeholder="اسم المستخدم" required name="username"><br>
+                <input type="email" placeholder="البريد الالكتروني" required name="email"><br>
+                <input type="password" placeholder="كلمة المرور" required name="password"><br>
+                <input type="submit" value="تسجيل">
+            </form>
+            {{d}}
+        </section>
+        <footer>برجاء الدعاء لصاحب الموقع</footer>
+    </html>

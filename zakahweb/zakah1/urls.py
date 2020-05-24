@@ -14,9 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url
-from zakah1.views import main
+from zakah1.views import main_f, signup_f
 
 
 urlpatterns = [
-    url('main',main,name='main')
+    url('main/',main_f,name='main'),
+    url('signup/',signup_f,name='signup')
 ]
