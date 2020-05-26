@@ -22,6 +22,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '-6z!-ob+0bk$rev@c=%*j=1v^m%rltlwewj=8&&#hd=p%2)7+('
 
+# Logs out automatically when browser closed
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

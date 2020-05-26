@@ -15,10 +15,12 @@
         </header>
         <section align="center">
             <form method="post" action="#" autocomplete="off" name="signin" target="_self">
-                <input type="text" placeholder="اسم المستخدم" name="username"><br>
-                <input type="password" placeholder="كلمة المرور" name="password"><br>
+                {% csrf_token %}
+                <input type="text" placeholder="اسم المستخدم" name="user_name"><br>
+                <input type="password" placeholder="كلمة المرور" name="pass_word"><br>
                 <input type="submit" value="تسجيل الدخول">
             </form>
+            <h1>{{name}}</h1>
         </section>
         <footer>برجاء الدعاء لصاحب الموقع</footer>
     </html>
