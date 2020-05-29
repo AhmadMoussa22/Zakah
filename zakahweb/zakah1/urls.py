@@ -24,3 +24,4 @@ urlpatterns = [
     url('signout/',signout_f,name='signout'),
     url('signin/',signin_f,name='signin')
 ]
+

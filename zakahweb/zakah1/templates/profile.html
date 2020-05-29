@@ -5,6 +5,19 @@
     <title>موقع زكاتي - صفحتي الشخصية</title>
 </head>
 <body>
-<h1>Welcome Back {{name}}</h1>
+    <h1>Welcome Back {{name}}
+    <section>
+            <form method="post" action="#" autocomplete="off" name="signin" target="_self">
+                {% csrf_token %}
+                <input type="text" value={{name}} disabled name="user_name"><br>
+                <label>ايداع</label>
+                <input type="radio" value="in" name="in_out" required><br>
+                <label>سحب</label>
+                <input type="radio" value="out" name="in_out" required><br>
+                <input type="date" placeholder="تاريخ المبلغ المدخر" name="saving_date"required><br>
+                <input type="number" placeholder="قيمة المبلغ المدخر" name="saving_amount" required><br>
+                <input type="submit" value="ارسل البيانات">
+            </form>
+    </section>
 </body>
 </html>

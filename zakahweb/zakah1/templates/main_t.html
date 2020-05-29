@@ -5,8 +5,12 @@
         <meta charset="UTF-8">
         <meta name="description" content="موقع لحساب اوقات قيمة زكاة المال و التوقيت المستحق فيه دفعها">
         <title>موقع زكاتي-الصفحة الرئيسية</title>
-	<link rel="stylesheet" href="main.css"/>
+	    <link rel="stylesheet" href="main.css"/>
         <link rel="stylesheet" href="{%static 'zakah1/css/main.css'%}"/>
+        <style>
+            #:after{content:"fdghjkj"}
+            #id_user_name{placeholder:'ahmad';height:200px}
+        </style>
     </head>
     <body>
         <header>
@@ -14,7 +18,7 @@
         </header>
         <nav>
             <ul>
-                <li><a href="sign up.html">انشاء حساب جديد</a></li>
+                <li><a id='fg'href="sign up.html">انشاء حساب جديد</a></li>
                 <li><a href="#">تسجيل الدخول</a></li>
                 <li><a href="#">حول الموقع</a></li>
                 <li><a href="#">كلمة الدكتور فلان الفلاني</a></li>
@@ -22,8 +26,12 @@
         </nav>
         <section>
             <div>
-            <iframe src="https://www.youtube.com/embed/GhtRO8qT2OA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>    </body>
+            <!--<iframe src="https://www.youtube.com/embed/GhtRO8qT2OA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>    </body>
+            -->
             </div>
         </section>
+        {{f.as_table}}
+        {{f.user_name}}
+
         <footer>برجاء الدعاء لصاحب الموقع</footer>
     </html>
