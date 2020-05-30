@@ -5,33 +5,169 @@
         <meta charset="UTF-8">
         <meta name="description" content="موقع لحساب اوقات قيمة زكاة المال و التوقيت المستحق فيه دفعها">
         <title>موقع زكاتي-الصفحة الرئيسية</title>
-	    <link rel="stylesheet" href="main.css"/>
+	    <link rel="stylesheet" href="../static/zakah1/css/main.css"/>
         <link rel="stylesheet" href="{%static 'zakah1/css/main.css'%}"/>
-        <style>
-            #:after{content:"fdghjkj"}
-            #id_user_name{placeholder:'ahmad';height:200px}
-        </style>
     </head>
     <body>
-        <header>
-            {وَمَا أَنْفَقْتُمْ مِنْ شَيْءٍ فَهُوَ يُخْلِفُهُ وَهُوَ خَيْرُ الرَّازِقِينَ}
-        </header>
-        <nav>
-            <ul>
-                <li><a id='fg'href="sign up.html">انشاء حساب جديد</a></li>
-                <li><a href="#">تسجيل الدخول</a></li>
-                <li><a href="#">حول الموقع</a></li>
-                <li><a href="#">كلمة الدكتور فلان الفلاني</a></li>
-            </ul>
-        </nav>
-        <section>
+        <section id="top">
             <div>
-            <!--<iframe src="https://www.youtube.com/embed/GhtRO8qT2OA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>    </body>
-            -->
+                <form method="post" action="#" autocomplete="off" name="signin" target="_self">
+                    {% csrf_token %}
+                    <input type="text" placeholder="اسم المستخدم" name="user_name">
+                    <input type="password" placeholder="كلمة المرور" name="pass_word"><br>
+                    <input type="submit" value="تسجيل الدخول">
+                </form>
             </div>
-        </section>
-        {{f.as_table}}
-        {{f.user_name}}
+            <article>
+                <h1>احسب زكاة مالك بدقة و سهولة</h1>
+                <p id="msg_area"></p>
+            </article>
 
-        <footer>برجاء الدعاء لصاحب الموقع</footer>
-    </html>
+        </section>
+        <main>
+            <section id="step1">
+                <p><span>اولا: </span>دخل بياناتك</p>
+                <form>
+                    {% csrf_token %}
+                    <h4>توقيت دفع اخر زكاة مال</h4>
+                    <input type="month" placeholder="توقيت دفع اخر زكاة مال">
+                    <h4>اجمالي المدخرات الان</h4>
+                    <table>
+                        <thead>
+                            <th>جنيه مصري</th>
+                            <th>جرام عيار 18</th>
+                            <th>جرام عيار 21</th>
+                            <th>جرام عيار 24</th>
+                        </thead>
+                        <tr>
+                            <td><input type="number" value="0"></td>
+                            <td><input type="number" value="0"></td>
+                            <td><input type="number" value="0"></td>
+                            <td><input type="number" value="0"></td>
+                        </tr>
+                    </table>
+                    <input type="submit" value="ارسال">
+
+                </form>
+                <form >
+                    {% csrf_token %}
+                    <h3>تحديث شهري لاجمالي المدخرات</h3>
+                    <h4>اختار الشهر</h4>
+                    <input type="month" disabled>
+                    <h4>اجمالي المدخرات</h4>
+                    <table>
+                        <thead>
+                            <th>جنيه مصري</th>
+                            <th>جرام عيار 18</th>
+                            <th>جرام عيار 21</th>
+                            <th>جرام عيار 24</th>
+                        </thead>
+                        <tr>
+                            <td><input type="number" placeholder="غير فعال" disabled></td>
+                            <td><input type="number" placeholder="غير فعال" disabled></td>
+                            <td><input type="number" placeholder="غير فعال" disabled></td>
+                            <td><input type="number" placeholder="غير فعال" disabled></td>
+                        </tr>
+                    </table>
+                    <input type="submit" value="غير فعال" disabled>
+
+                </form>
+
+            </section>
+            <section id="step2">
+                <p><span>ثانيا: </span>اعرف مقدار زكاتك المستحقة</p>
+                <div id="tb">
+                <table>
+                    <thead>
+                        <th>المبلغ المستحق بالجنيه</th>
+                        <th>تاريخ الاستحقاق</th>
+                    </thead>
+                    <tr>
+                        <td>1200</td>
+                        <td>يناير</td>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td>فبراير</td>
+                    </tr>
+                    <tr>
+                        <td>555</td>
+                        <td>مارس</td>
+                    </tr>
+                    <tr>
+                        <td>380</td>
+                        <td>ابريل</td>
+                    </tr>
+                    <tr>
+                        <td>1200</td>
+                        <td>مايو</td>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td>يونيو</td>
+                    </tr>
+                    <tr>
+                        <td>555</td>
+                        <td>يوليو</td>
+                    </tr>
+                    <tr>
+                        <td>380</td>
+                        <td>اغسطس</td>
+                    </tr>
+                    <tr>
+                        <td>1200</td>
+                        <td>سبتمبر</td>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td>اكتوبر</td>
+                    </tr><tr>
+                        <td>555</td>
+                        <td>نوفمبر</td>
+                    </tr>
+                    <tr>
+                        <td>380</td>
+                        <td>ديسمبر</td>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td>يونيو</td>
+                    </tr>
+                    <tr>
+                        <td>555</td>
+                        <td>يوليو</td>
+                    </tr>
+                    <tr>
+                        <td>380</td>
+                        <td>اغسطس</td>
+                    </tr>
+                    <tr>
+                        <td>1200</td>
+                        <td>سبتمبر</td>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td>اكتوبر</td>
+                    </tr><tr>
+                        <td>555</td>
+                        <td>نوفمبر</td>
+                    </tr>
+                    <tr>
+                        <td>380</td>
+                        <td>ديسمبر</td>
+                    </tr>
+                </table>
+                </div>
+            </section>
+            <section id="step3">
+                <div>
+                <form>
+                    {% csrf_token %}
+                    <input type="submit" value="احفظ بياناتي">
+                </form>
+                    </div>
+
+            </section>
+        </main>
+    </body>
+</html>

@@ -17,10 +17,8 @@ from datetime import date,timedelta
 # python manage.py runserver
 
 def main_f(request):
-    f=signin_form()
+
     if request.user.is_authenticated():  # check user loged in else redirect to signin with message
-
-
 ###########################################################################
 # declare and assign: 'username' from authenticatin, object for zakah register table, object for zakah summary table,
 # 'Nesab' value(constant) , previous nesab acheived status from the last 'total saving' value
