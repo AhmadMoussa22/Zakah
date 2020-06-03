@@ -1,0 +1,182 @@
+*
+{
+margin:0;
+box-sizing: border-box;
+background: rgba(225,225,225,1);
+padding:0;
+direction:rtl;
+overflow:auto;
+font-family:"Comic Sans MS", cursive, sans-serif;
+text-align:center;
+}
+body
+{
+height:100vh;
+}
+
+#top
+{
+height:15vh;
+position:relative;
+}
+
+    #top details
+    {
+    height:100%;
+    width:34%;
+    position:absolute;
+    left:0;
+    top:0;
+    }
+        #top details form
+        {
+        height:75%;
+        width:100%;
+        position:absolute;
+        left:0;
+        bottom:0;
+        z-index:1;
+        }
+        #top details summary
+        {
+        height:100%;
+        width:100%;
+        position:absolute;
+        left:0;
+        top:0;
+        }
+        #top details summary h3, #top details summary span
+        {
+        text-align:center;
+        margin-right:30%;
+        background:yellow;
+        }
+        #top article
+        {
+        position:absolute;
+        height:100%;
+        width:66%;
+        top:0;
+        right:0;
+        }
+
+
+
+
+input
+{
+width:90%;
+height:25%;
+margin-left:5%;
+font-size:20px;
+direction:rtl;
+text-align:center;
+background:white;
+color:black;
+border-radius:5px;
+}
+input[type='submit']
+{
+width:50%;
+background:green;
+color:white;
+margin-left:25%;
+margin-right:25%;
+}
+
+    section article
+    {
+    float:right;
+    height:100%;
+    width:66%;
+    text-align:center;
+    }
+        section article h1
+        {
+        font-size:40px;
+        }
+
+main
+{
+height:85vh;
+width:100%;
+position:relative;
+direction:rtl;
+text-align:right;
+}
+
+#step1, #step2
+{
+position:absolute;
+top:0;
+display:inline-block;
+width:45%;
+height: 80%;
+color:blue;
+}
+#step1 p, #step2 p
+{
+font-size:20px;
+margin:5px 5px;
+}
+#step1 p span, #step2 p span
+{
+font-weight:bold;
+}
+
+#step1
+{
+right:5%;
+}
+#step2
+{
+right:50%;
+height: 64vh;
+
+}
+#step2 input
+{
+width:34%;
+height: 50%;
+
+}
+
+table
+{
+margin:0 auto;
+position:relative;
+}
+
+
+
+#step2 th, #step2 td
+{
+border:2px solid yellow;
+border-radius:5px;
+}
+#step3
+{
+position:absolute;
+bottom:0;
+width:100%;
+height:20%
+}
+#step3 div
+{
+float:none;
+width:100%;
+}
+#step3 div form
+{
+float:none;
+width:50%;
+margin:0 auto;
+}
+#step3 div form input
+{
+position:relative;
+right:20%;
+height:50%;
+float:none;
+width:50%;
+}

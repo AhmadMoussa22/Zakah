@@ -27,11 +27,24 @@ update_values_dates=my_aux.update_objects
 def main_f(request):
     mess_main=request.session.get('mes_main')
     request.session['mes_main']=''
-    form_f=signin_form
+    updatedetails_o = zakah_register_c()
+    nesab=80000
     if request.user.is_authenticated():  # check user logged in
         user_name = request.user.username
-        return render(request, 'main_t.html', {'name': user_name,'mess':mess_main})
-    return render (request,'main_t.html',{'mess':mess_main,'f':form_f})
+        return render(request, 'main_in.html', {'name': user_name,'mess':mess_main})
+    elif request.method=='POST':
+        total_saving=request.POST['init_save_le']
+        start_date=request.POST['init_save_date']
+        if int(total_saving)<nesab:
+            date_cell='غير مطلوب زكاة'
+            zakah_cell='غير مطلوب زكاة'
+        else:
+            year, month = start_date.split('-')
+            date_cell=date(int(year),int(month),1)+timedelta(days=354)
+            zakah_cell=int(total_saving)*.025
+        return render(request,'main_out2.html',{'date_cell':date_cell,'zakah_cell':zakah_cell,'start_date':start_date,'total_saving':total_saving})
+    else:
+        return render (request,'main_out1.html',{'mess':mess_main})
 
 ################################################################
 
@@ -174,4 +187,5 @@ def update_DB_f(request):
 
 def signout_f(request):
     logout(request)
-    return HttpResponseRedirect(reverse('main'))
+    #return HttpResponseRedirect(reverse('main'))
+    return HttpResponse('Ok Tamam')

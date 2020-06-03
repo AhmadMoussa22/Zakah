@@ -1,0 +1,173 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="موقع لحساب اوقات قيمة زكاة المال و التوقيت المستحق فيه دفعها">
+        <title>موقع زكاتي-الصفحة الرئيسية</title>
+	    <!--<link rel="stylesheet" href="../static/zakah1/css/main.css"/>-->
+        <link rel="stylesheet" href="{%static 'zakah1/css/main.css'%}"/>
+    </head>
+    <body>
+        <section id="top">
+            <div>
+                <form method="post" action="{%url 'signin'%}" autocomplete="off" name="signin" target="_self">
+                    {% csrf_token %}
+                    <input type="text" placeholder="اسم المستخدم" name="user_name">
+                    <input type="password" placeholder="كلمة المرور" name="pass_word"><br>
+                    <input type="submit" value="تسجيل الدخول">
+                </form>
+            </div>
+            <article>
+                <h1>احسب زكاة مالك بدقة و سهولة</h1>
+                <p id="msg_area">{{mess}}</p>
+            </article>
+
+        </section>
+        <main>
+            <section id="step1">
+                <p><span>اولا: </span>دخل بياناتك</p>
+                <form method="post" action="{%url 'main'%}" autocomplete="off" name="init_save" target="_self">
+                    {% csrf_token %}
+                    <h4>توقيت دفع اخر زكاة مال</h4>
+                    <input type="month" name="init_save_date" placeholder="توقيت دفع اخر زكاة مال">
+                    <h4>اجمالي المدخرات الان</h4>
+                    <table>
+                        <thead>
+                            <th>جنيه مصري</th>
+                            <th>جرام عيار 18</th>
+                            <th>جرام عيار 21</th>
+                            <th>جرام عيار 24</th>
+                        </thead>
+                        <tr>
+                            <td><input name="init_save_le" type="number" value="0"></td>
+                            <td><input name="init_save_18" type="number" value="0"></td>
+                            <td><input name="init_save_21" type="number" value="0"></td>
+                            <td><input name="init_save_24" type="number" value="0"></td>
+                        </tr>
+                    </table>
+                    <input type="submit" value="ارسال">
+
+                </form>
+                <form  method="post" action="{%url 'updatedb'%}" autocomplete="off" name="month_save" target="_self">
+                    {% csrf_token %}
+                    <h3>تحديث شهري لاجمالي المدخرات</h3>
+                    <h4>اختار الشهر</h4>
+                    <input name="month_save_date" type="month" >
+                    <h4>اجمالي المدخرات</h4>
+                    <table>
+                        <thead>
+                            <th>جنيه مصري</th>
+                            <th>جرام عيار 18</th>
+                            <th>جرام عيار 21</th>
+                            <th>جرام عيار 24</th>
+                        </thead>
+                        <tr>
+                            <td><input name="month_save_le" type="number" placeholder="غير فعال" ></td>
+                            <td><input name="month_save_18" type="number" placeholder="غير فعال" disabled></td>
+                            <td><input name="month_save_21" type="number" placeholder="غير فعال" disabled></td>
+                            <td><input name="month_save_24" type="number" placeholder="غير فعال" disabled></td>
+                        </tr>
+                    </table>
+                    <input type="submit" value="غير فعال" >
+
+                </form>
+
+            </section>
+            <section id="step2">
+                <p><span>ثانيا: </span>اعرف مقدار زكاتك المستحقة</p>
+                <div id="tb">
+                <table>
+                    <thead>
+                        <th>المبلغ المستحق بالجنيه</th>
+                        <th>تاريخ الاستحقاق</th>
+                    </thead>
+                    <tr>
+                        <td>1200</td>
+                        <td>يناير</td>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td>فبراير</td>
+                    </tr>
+                    <tr>
+                        <td>555</td>
+                        <td>مارس</td>
+                    </tr>
+                    <tr>
+                        <td>380</td>
+                        <td>ابريل</td>
+                    </tr>
+                    <tr>
+                        <td>1200</td>
+                        <td>مايو</td>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td>يونيو</td>
+                    </tr>
+                    <tr>
+                        <td>555</td>
+                        <td>يوليو</td>
+                    </tr>
+                    <tr>
+                        <td>380</td>
+                        <td>اغسطس</td>
+                    </tr>
+                    <tr>
+                        <td>1200</td>
+                        <td>سبتمبر</td>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td>اكتوبر</td>
+                    </tr><tr>
+                        <td>555</td>
+                        <td>نوفمبر</td>
+                    </tr>
+                    <tr>
+                        <td>380</td>
+                        <td>ديسمبر</td>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td>يونيو</td>
+                    </tr>
+                    <tr>
+                        <td>555</td>
+                        <td>يوليو</td>
+                    </tr>
+                    <tr>
+                        <td>380</td>
+                        <td>اغسطس</td>
+                    </tr>
+                    <tr>
+                        <td>1200</td>
+                        <td>سبتمبر</td>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td>اكتوبر</td>
+                    </tr><tr>
+                        <td>555</td>
+                        <td>نوفمبر</td>
+                    </tr>
+                    <tr>
+                        <td>380</td>
+                        <td>ديسمبر</td>
+                    </tr>
+                </table>
+                </div>
+            </section>
+            <section id="step3">
+                <div>
+                <form method="post" action="{%url 'main'%}" autocomplete="off" name="initial_save" target="_self">
+                    {% csrf_token %}
+                    <input type="submit" value="احفظ بياناتي">
+                </form>
+                    </div>
+
+            </section>
+        </main>
+    </body>
+</html>
