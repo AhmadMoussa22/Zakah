@@ -44,6 +44,9 @@ class auxilary():
             if current_status:  # previous_status False and current_status True
                 object2.nesab_day = object1.saving_day
                 object2.save()
+                object1.start_day=object1.saving_day
+                object1.deserve_day=object1.start_day + timedelta(days=354)
+                object1.save()
                 for i in set_object1:
                     i.start_day = object1.saving_day
                     i.deserve_day = i.start_day + timedelta(days=354)

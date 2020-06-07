@@ -6,20 +6,20 @@
         <meta name="description" content="موقع لحساب اوقات قيمة زكاة المال و التوقيت المستحق فيه دفعها">
         <title>موقع زكاتي-الصفحة الرئيسية</title>
 	    <!--<link rel="stylesheet" href="../static/zakah1/css/main.css"/>-->
-        <link rel="stylesheet" href="{%static 'zakah1/css/main_out.css'%}"/>
+        <link rel="stylesheet" href="{%static 'zakah1/css/main_out1.css'%}"/>
     </head>
     <body>
         <header id="top">
             <details>
                 <summary>
                     <h3>هل لديك حساب بالفعل؟</h3>
-                    <span>اضغط لتسجيل الدخول</span>
+                    <h4>اضغط لتسجيل الدخول</h4>
                 </summary>
                 <form method="post" action="{%url 'signin'%}" autocomplete="off" name="signin" target="_self">
                     {% csrf_token %}
-                    <input type="text" placeholder="اسم المستخدم" name="user_name">
-                    <input type="submit" value="تسجيل الدخول">
-                    <input type="password" placeholder="كلمة المرور" name="pass_word">
+                    <input type="text" required placeholder="اسم المستخدم" name="user_name">
+                    <input type="password" required placeholder="كلمة المرور" name="pass_word">
+                    <input type="submit" required value="تسجيل الدخول">
                 </form>
             </details>
             <article>
@@ -43,12 +43,14 @@
                             <th>جرام عيار 21</th>
                             <th>جرام عيار 24</th>
                         </thead>
-                        <tr>
-                            <td><input type="number" name="init_save_le" required></td>
-                            <td><input type="number" name="init_save_18" value="0"></td>
-                            <td><input type="number" name="init_save_21" value="0"></td>
-                            <td><input type="number" name="init_save_24" value="0"></td>
-                        </tr>
+                        <tbody>
+                            <tr>
+                                <td><input type="number" name="init_save_le" required value="0"></td>
+                                <td><input type="number" name="init_save_18" disabled value="0"></td>
+                                <td><input type="number" name="init_save_21" disabled value="0"></td>
+                                <td><input type="number" name="init_save_24" disabled value="0"></td>
+                            </tr>
+                        </tbody>
                     </table>
                     <input type="hidden" name="init_save_scrn" vlaue="2">
                 </form>

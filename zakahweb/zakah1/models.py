@@ -16,10 +16,11 @@ class zakah_register_c(models.Model): #zakah register table
     deserve_day=models.DateField(default=date(1111,1,1)) # Due date to pay zakah
     active_saving=models.FloatField(default=0)
     active=models.BooleanField(default=True)
+    nesab_acheived=models.BooleanField(default=True)
 
 class zakah_summary_c(models.Model): #zakah register table
     username=models.ForeignKey(User,on_delete=models.CASCADE)#This means that this colmn of the table 'zreg_c'
     # is an object of the table 'User'
     total_saving=models.FloatField(default=0)
     nesab_day=models.DateField(default=date(1111,1,1)) # the date of reaching nesab
-    required_zakah=models.FloatField()
+    required_zakah=models.FloatField(default=0)
