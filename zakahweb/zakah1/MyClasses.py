@@ -39,7 +39,7 @@ class auxilary():
 #case3: previous:true & current:true(and deposit not withdrawl)-->update start_day and nesab_day of object1(current entry only)
 #case4: previous:true & current:false-->update stare_day and deserve day in the set of object1(all the detailed table)
 #     and update nesab_day in object 2(summary table)[to equale inactive date]
-    def update_objects(self,previous_status,current_status,object2,object1,set_object1):
+    def update_objects(self,previous_status,current_status,object2,object1,list_object1):
         if previous_status == False:
             if current_status:  # previous_status False and current_status True
                 object2.nesab_day = object1.saving_day
@@ -47,7 +47,7 @@ class auxilary():
                 object1.start_day=object1.saving_day
                 object1.deserve_day=object1.start_day + timedelta(days=354)
                 object1.save()
-                for i in set_object1:
+                for i in list_object1:
                     i.start_day = object1.saving_day
                     i.deserve_day = i.start_day + timedelta(days=354)
                     i.save()
@@ -60,8 +60,8 @@ class auxilary():
             else:  # previous_status True and current_status False
                 object2.nesab_day = date(1111, 1, 1)
                 object2.save()
-                for i in set_object1:
+                for i in list_object1:
                     i.start_day = date(1111, 1, 1)
                     i.deserve_day = date(1111, 1, 1)
                     i.save()
-        return object2,object1,set_object1
+        return object2,object1,list_object1
