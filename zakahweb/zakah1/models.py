@@ -17,6 +17,7 @@ class zakah_register_c(models.Model): #zakah register table
     active_saving=models.FloatField(default=0)
     active=models.BooleanField(default=True)
     nesab_acheived=models.BooleanField(default=True)
+    net_save_increase=models.FloatField(default=0)
 
 class zakah_summary_c(models.Model): #zakah register table
     username=models.ForeignKey(User,on_delete=models.CASCADE)#This means that this colmn of the table 'zreg_c'

@@ -12,13 +12,16 @@ class auxilary():
 # A function that accepts the 'deduction value' and a set of objects with values and dates
 # it arranges objects descending by date; deduct the deduction value from arranged objects one by one until deduction
 # reaches zero
-    def deduct_till_zero(self,deduction_value,object_set):
+    def deduct_till_zero(self,deduction_value,object_list):
+        print 1111111111
         active_indication = deduction_value#a negative value
-        object_set = sorted(object_set, key=operator.attrgetter('saving_day'), reverse=True)
+        object_list = sorted(object_list, key=operator.attrgetter('saving_day'), reverse=True)
         # to arrange a queryset
-        for i in object_set:
+        for i in object_list:
+            print 222222222222222222
             active_indication = active_indication + i.active_saving
             if active_indication <= 0:
+                print 33333333333333
                 i.active_saving = 0
                 i.zakah = i.active_saving * .025
                 i.active = False
@@ -30,7 +33,7 @@ class auxilary():
                 i.zakah = i.active_saving * .025
                 i.save()
                 break
-        return
+        return  active_indication
 
 #update_objects
 #case1: previous:flase & current:false-->change nothing
@@ -65,3 +68,32 @@ class auxilary():
                     i.deserve_day = date(1111, 1, 1)
                     i.save()
         return object2,object1,list_object1
+
+##a method that calculates the net deduct caused by all dates after certain date to previous dates
+    def calc_net_deduc(self,obj_list):
+        net_deduct=0
+        for i in obj_list:
+            if i.active_saving!=0:
+                break
+            else:
+                net_deduct=net_deduct+i.net_save_increase
+        return net_deduct
+
+##a method that reads a total deduct till specific date and returns the indexes of the dates affected by THIS deduct
+    def list_deducted(self,obj_list,net_deduct):#net_deduct is a negative value
+        withdrawl=0
+        deducted_list=[]
+        for i in obj_list:
+            if i.net_save_increase<0:
+                withdrawl+=i.net_save_increase
+            elif withdrawl>0:
+                withdrawl+=i.net_save_increase
+                if withdrawl<0:
+                    net_deduct+= i.net_save_increase
+                    deducted_list+= [i]
+            else:
+                net_deduct+=i.net_save_increase
+                deducted_list+=[i]
+            if net_deduct>=0:
+                break
+        return deducted_list
