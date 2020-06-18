@@ -73,27 +73,47 @@ class auxilary():
     def calc_net_deduc(self,obj_list):
         net_deduct=0
         for i in obj_list:
-            if i.active_saving!=0:
+            print 'aa',obj_list.index(i),i.saving_day,i.net_save_increase,i.active_saving,net_deduct
+            if i.active_saving != 0.0:
                 break
             else:
                 net_deduct=net_deduct+i.net_save_increase
+            print net_deduct
         return net_deduct
 
-##a method that reads a total deduct till specific date and returns the indexes of the dates affected by THIS deduct
+##a method that reads a total deduct till specific date and returns a list of the objects affected by THIS deduct
     def list_deducted(self,obj_list,net_deduct):#net_deduct is a negative value
         withdrawl=0
         deducted_list=[]
+        obj_list.reverse()
         for i in obj_list:
-            if i.net_save_increase<0:
-                withdrawl+=i.net_save_increase
-            elif withdrawl>0:
-                withdrawl+=i.net_save_increase
-                if withdrawl<0:
-                    net_deduct+= i.net_save_increase
-                    deducted_list+= [i]
-            else:
-                net_deduct+=i.net_save_increase
-                deducted_list+=[i]
             if net_deduct>=0:
                 break
-        return deducted_list
+            if i.net_save_increase<0:
+                withdrawl+=i.net_save_increase
+            elif withdrawl<0:
+                withdrawl+=i.net_save_increase
+                if withdrawl>0:#withdrawl equals the remaining in the net_save_increase after deducting the previous withdrawl
+                                #now ready to deduct the net_deduct from the remaining-if it is >net_deduct
+                    if abs(net_deduct)<=withdrawl:
+                        j=[i,abs(net_deduct)]
+                        deducted_list += [j]
+                        break
+                    else:
+                        net_deduct+= withdrawl
+                        j=[i,withdrawl]
+                    deducted_list+= [j]
+            else:
+                print 'net_deduct',net_deduct
+                net_deduct+=i.net_save_increase
+                if net_deduct<0:
+                    j=[i,i.net_save_increase]
+                else:
+                    j=[i,i.net_save_increase-net_deduct]
+                deducted_list += [j]
+        return deducted_list#a list of lists, each sub list contains the object and the deduction(positive value)
+    def list_copy(self,list):
+        new_list=[]
+        for i in list:
+            new_list.append(i)
+        return new_list
