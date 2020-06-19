@@ -235,21 +235,21 @@ def update_DB_f(request):
                 duplicate=False #initial value
                 list_zakahdetails_all_1=[]#initial value
                 new_item_index_all=0#initial value
-                for j in list_zakahdetails_all:
-                    if updatedetails_o.saving_day==j.saving_day:
+                for old in list_zakahdetails_all:
+                    if updatedetails_o.saving_day==old.saving_day:
                         override=True
                         print 'override=',override
-                        if int(updatedetails_o.saving)==int(j.saving):
+                        if int(updatedetails_o.saving)==int(old.saving):
                             duplicate=True
                             print 'duplicate=',duplicate
                         else:
-                            updatedetails_o.pk=j.pk
-                            new_item_index_all=list_zakahdetails_all.index(j)
+                            updatedetails_o.pk=old.pk
+                            new_item_index_all=list_zakahdetails_all.index(old)
                             list_zakahdetails_all_1=copy.deepcopy(list_zakahdetails_all)
                             list_zakahdetails_all_1[new_item_index_all]=updatedetails_o
                             list_zakahdetails_all_1 = sorted(list_zakahdetails_all_1,
                                                             key=operator.attrgetter('saving_day'))#to be deleted
-                            overrided_item=j
+                            overrided_item=old
                             #if override and no duplicate create the new list(with the new item added and keep the old)
                         break
                 if duplicate==False:#if duplicate(same savin_day and saving)-->skip all steps and go to 'return'
@@ -288,10 +288,11 @@ def update_DB_f(request):
                     # assign values of previous_nesab_acheived
                     if new_item_index_all==0:
                         previous_nesab_acheived=False
-                    elif override:
-                        previous_nesab_acheived=j.nesab_acheived# from the previous for loop
                     else:
-                        previous_nesab_acheived = list_zakahdetails_all_1[new_item_index_all-1].nesab_acheived
+                        previous_nesab_acheived = list_zakahdetails_all_1[new_item_index_all - 1].nesab_acheived
+                    if override:
+                        old_nesab_acheived=old.nesab_acheived# from the previous for loop
+
                     ################################################
 
 
@@ -574,29 +575,152 @@ def update_DB_f(request):
                         # create list_zakahdetails_1 which contains all 'active' items excluding the latest item
 
                     ################################################################################################################
-                        if not override:
-                            next_nesab_acheived=list_zakahdetails_all_1[new_item_index_all+1].nesab_acheived
-                            if nesab_acheived and next_nesab_acheived and list_zakahdetails_all_1[new_item_index_all+1].start_day==list_zakahdetails_all_1[new_item_index_all+1].saving_day:
-                                list_zakahdetails_all_1[new_item_index_all].start_day = list_zakahdetails_all_1[
-                                    new_item_index_all ].saving_day
-                                list_zakahdetails_all_1[new_item_index_all].deserve_day = list_zakahdetails_all_1[
-                                    new_item_index_all].saving_day+timedelta(days=354)
-                                list_zakahdetails_all_1[new_item_index_all].save()
-                            elif not nesab_acheived and next_nesab_acheived and list_zakahdetails_all_1[new_item_index_all+1].start_day==list_zakahdetails_all_1[new_item_index_all+1].saving_day:
-                                for i in list_zakahdetails_all_1[:new_item_index_all+1]:
-                                    if i.active:
-                                        i.start_day=list_zakahdetails_all_1[new_item_index_all+1].saving_day
-                                        i.deserve_day=list_zakahdetails_all_1[new_item_index_all+1].start_day+timedelta(days=354)
-                                        i.save()
-                            else:
-                                list_zakahdetails_all_1[new_item_index_all].start_day = list_zakahdetails_all_1[
-                                    new_item_index_all + 1].start_day
-                                list_zakahdetails_all_1[new_item_index_all].deserve_day = list_zakahdetails_all_1[
-                                    new_item_index_all + 1].deserve_day
-                                list_zakahdetails_all_1[new_item_index_all].save()
-                            list_zakahdetails_all_1[new_item_index_all + 1].save()
-                        else:#if override
-                            pass
+                        list_zakahdetails_1=[]#inital value
+                        for i in list_zakahdetails_all_1:
+                            if i.active:
+                              list_zakahdetails_1+=[i]
+
+                        noreset=True#initial value
+                        for i in list_zakahdetails_all_1[new_item_index_all+1:]:
+                            if i.active:
+                                break
+                            elif not i.nesab_acheived:
+                                noreset=False
+                                break
+
+                        if list_zakahdetails_1[-1].saving_day>list_zakahdetails_all_1[new_item_index_all].saving_day:#if new item is not the last active item
+                            for i in list_zakahdetails_1:#get value of next_active_item_index
+                                if i.saving_day > list_zakahdetails_all_1[new_item_index_all].saving_day:
+                                    next_active_item_index = list_zakahdetails_1.index(i)
+                                    break
+                            if not override:
+                                if previous_nesab_acheived and nesab_acheived and noreset and list_zakahdetails_1[next_active_item_index].start_day==list_zakahdetails_1[next_active_item_index].saving_day:
+                                    list_zakahdetails_all_1[new_item_index_all].start_day = list_zakahdetails_all_1[
+                                        new_item_index_all ].saving_day
+                                    list_zakahdetails_all_1[new_item_index_all].deserve_day = list_zakahdetails_all_1[
+                                        new_item_index_all].saving_day+timedelta(days=354)
+                                    list_zakahdetails_all_1[new_item_index_all].save()
+                                elif previous_nesab_acheived and not nesab_acheived and noreset and list_zakahdetails_1[next_active_item_index].start_day==list_zakahdetails_1[next_active_item_index].saving_day:
+                                    for i in list_zakahdetails_all_1[:new_item_index_all+1]:
+                                        if i.active:
+                                            i.start_day=list_zakahdetails_1[next_active_item_index].start_day
+                                            i.deserve_day=list_zakahdetails_1[next_active_item_index].deserve_day
+                                            i.save()
+                                elif not previous_nesab_acheived and nesab_acheived and noreset and list_zakahdetails_1[next_active_item_index].start_day==list_zakahdetails_1[next_active_item_index].saving_day:
+                                    for i in list_zakahdetails_all_1[:new_item_index_all+1]:
+                                        if i.active:
+                                            i.start_day=list_zakahdetails_all_1[new_item_index_all].saving_day
+                                            i.deserve_day=list_zakahdetails_all_1[new_item_index_all].saving_day+timedelta(days=354)
+                                            i.save()
+                                else:
+                                    list_zakahdetails_all_1[new_item_index_all].start_day =list_zakahdetails_1[next_active_item_index].start_day
+                                    list_zakahdetails_all_1[new_item_index_all].deserve_day = list_zakahdetails_1[next_active_item_index].deserve_day
+                                    list_zakahdetails_all_1[new_item_index_all].save()
+                                list_zakahdetails_all_1[new_item_index_all + 1].save()
+                            else:#if override
+                                if noreset and list_zakahdetails_1[next_active_item_index].start_day==list_zakahdetails_1[next_active_item_index].saving_day:
+                                    if not previous_nesab_acheived:
+                                        if not old_nesab_acheived and nesab_acheived:
+                                            for i in list_zakahdetails_all_1[:new_item_index_all + 1]:
+                                                if i.active:
+                                                    i.start_day = list_zakahdetails_all_1[new_item_index_all].saving_day
+                                                    i.deserve_day = list_zakahdetails_all_1[
+                                                                        new_item_index_all].saving_day + timedelta(
+                                                        days=354)
+                                                    i.save()
+                                        elif old_nesab_acheived and not nesab_acheived:
+                                            for i in list_zakahdetails_all_1[:new_item_index_all + 1]:
+                                                if i.active:
+                                                    i.start_day = list_zakahdetails_1[next_active_item_index].start_day
+                                                    i.deserve_day = list_zakahdetails_1[
+                                                        next_active_item_index].deserve_day
+                                                    i.save()
+                                    else:#previous_nesab_acheived
+                                        if old_nesab_acheived and not nesab_acheived:
+                                            for i in list_zakahdetails_all_1[:new_item_index_all + 1]:
+                                                if i.active:
+                                                    i.start_day = list_zakahdetails_1[next_active_item_index].start_day
+                                                    i.deserve_day = list_zakahdetails_1[
+                                                        next_active_item_index].deserve_day
+                                                    i.save()
+                                        elif not old_nesab_acheived and nesab_acheived:
+                                            list_zakahdetails_all_1[new_item_index_all].start_day = \
+                                            list_zakahdetails_all_1[
+                                                new_item_index_all].saving_day
+                                            list_zakahdetails_all_1[new_item_index_all].deserve_day = \
+                                            list_zakahdetails_all_1[
+                                                new_item_index_all].saving_day + timedelta(days=354)
+                                            list_zakahdetails_all_1[new_item_index_all].save()
+                                            x=range(0,new_item_index_all)
+                                            x.reverse()
+                                            date_o=list_zakahdetails_all_1[new_item_index_all].saving_day
+                                            sw = False
+                                            for i in x:#update previous items(they were affected by old item)
+                                                if list_zakahdetails_all_1[i].nesab_acheived and not sw:
+                                                    if list_zakahdetails_all_1[i].active:
+                                                        date_o=list_zakahdetails_all_1[i].saving_day
+                                                        list_zakahdetails_all_1[i].start_day=list_zakahdetails_all_1[i].saving_day
+                                                        list_zakahdetails_all_1[i].deserve_day=list_zakahdetails_all_1[i].saving_day+timedelta(days=354)
+                                                        list_zakahdetails_all_1[i].save()
+                                                else:
+                                                    sw=True
+                                                    if list_zakahdetails_all_1[i].active:
+                                                        list_zakahdetails_all_1[i].start_day=date_o
+                                                        list_zakahdetails_all_1[i].deserve_day=date_o+timedelta(days=354)
+                                                        list_zakahdetails_all_1[i].save()
+                        else:#if the new item has no active item next
+                            if not override:
+                                if previous_nesab_acheived and nesab_acheived and list_zakahdetails_all_1[-1].nesab_acheived:
+                                    list_zakahdetails_all_1[new_item_index_all].start_day=list_zakahdetails_all_1[new_item_index_all].saving_day
+                                    list_zakahdetails_all_1[new_item_index_all].deserve_day = list_zakahdetails_all_1[
+                                        new_item_index_all].saving_day+timedelta(days=354)
+                                elif not previous_nesab_acheived and nesab_acheived and list_zakahdetails_all_1[-1].nesab_acheived:
+                                    for i in list_zakahdetails_all_1[:new_item_index_all + 1]:
+                                        if i.active:
+                                            i.start_day = list_zakahdetails_all_1[new_item_index_all].saving_day
+                                            i.deserve_day = list_zakahdetails_all_1[
+                                                                new_item_index_all].saving_day + timedelta(
+                                                days=354)
+                                            i.save()
+                            else:#if override
+                                if previous_nesab_acheived and not old_nesab_acheived and nesab_acheived and list_zakahdetails_all_1[-1].nesab_acheived:
+                                    list_zakahdetails_all_1[new_item_index_all].start_day = \
+                                        list_zakahdetails_all_1[
+                                            new_item_index_all].saving_day
+                                    list_zakahdetails_all_1[new_item_index_all].deserve_day = \
+                                        list_zakahdetails_all_1[
+                                            new_item_index_all].saving_day + timedelta(days=354)
+                                    list_zakahdetails_all_1[new_item_index_all].save()
+                                    x = range(0, new_item_index_all)
+                                    x.reverse()
+                                    date_o = list_zakahdetails_all_1[new_item_index_all].saving_day
+                                    sw = False
+                                    for i in x:  # update previous items(they were affected by old item)
+                                        if list_zakahdetails_all_1[i].nesab_acheived and not sw:
+                                            if list_zakahdetails_all_1[i].active:
+                                                date_o = list_zakahdetails_all_1[i].saving_day
+                                                list_zakahdetails_all_1[i].start_day = list_zakahdetails_all_1[
+                                                    i].saving_day
+                                                list_zakahdetails_all_1[i].deserve_day = list_zakahdetails_all_1[
+                                                                                             i].saving_day + timedelta(
+                                                    days=354)
+                                                list_zakahdetails_all_1[i].save()
+                                        else:
+                                            sw = True
+                                            if list_zakahdetails_all_1[i].active:
+                                                list_zakahdetails_all_1[i].start_day = date_o
+                                                list_zakahdetails_all_1[i].deserve_day = date_o + timedelta(days=354)
+                                                list_zakahdetails_all_1[i].save()
+                                elif not previous_nesab_acheived and not old_nesab_acheived and nesab_acheived and list_zakahdetails_all_1[-1].nesab_acheived:
+                                    for i in list_zakahdetails_all_1[:new_item_index_all + 1]:
+                                        if i.active:
+                                            i.start_day = list_zakahdetails_all_1[new_item_index_all].saving_day
+                                            i.deserve_day = list_zakahdetails_all_1[
+                                                                new_item_index_all].saving_day + timedelta(
+                                                days=354)
+                                            i.save()
+
+
                     ####################################################################################################
 
                     else:# new item is the last item
@@ -678,7 +802,54 @@ def update_DB_f(request):
                                                                                                                             -1],
                                                                                                       list_zakahdetails_1)
                         else:#last item overrided
-                            pass
+                            if previous_nesab_acheived:
+                                if old_nesab_acheived and not nesab_acheived:
+                                    for i in list_zakahdetails_all_1:
+                                        if i.active:
+                                            i.start_day=date(1111,1,1)
+                                            i.deserve_day=date(1111,1,1)
+                                            i.save()
+                                elif not old_nesab_acheived and nesab_acheived:
+                                    list_zakahdetails_all_1[new_item_index_all].start_day = \
+                                        list_zakahdetails_all_1[
+                                            new_item_index_all].saving_day
+                                    list_zakahdetails_all_1[new_item_index_all].deserve_day = \
+                                        list_zakahdetails_all_1[
+                                            new_item_index_all].saving_day + timedelta(days=354)
+                                    list_zakahdetails_all_1[new_item_index_all].save()
+                                    x = range(0, new_item_index_all)
+                                    x.reverse()
+                                    date_o = list_zakahdetails_all_1[new_item_index_all].saving_day
+                                    sw = False
+                                    for i in x:  # update previous items(they were affected by old item)
+                                        if list_zakahdetails_all_1[i].nesab_acheived and not sw:
+                                            if list_zakahdetails_all_1[i].active:
+                                                date_o = list_zakahdetails_all_1[i].saving_day
+                                                list_zakahdetails_all_1[i].start_day = list_zakahdetails_all_1[
+                                                    i].saving_day
+                                                list_zakahdetails_all_1[i].deserve_day = list_zakahdetails_all_1[
+                                                                                             i].saving_day + timedelta(
+                                                    days=354)
+                                                list_zakahdetails_all_1[i].save()
+                                        else:
+                                            sw = True
+                                            if list_zakahdetails_all_1[i].active:
+                                                list_zakahdetails_all_1[i].start_day = date_o
+                                                list_zakahdetails_all_1[i].deserve_day = date_o + timedelta(days=354)
+                                                list_zakahdetails_all_1[i].save()
+                            else:#previous_nesab not acheived
+                                if old_nesab_acheived and not nesab_acheived:
+                                    for i in list_zakahdetails_all_1:
+                                        if i.active:
+                                            i.start_day=date(1111,1,1)
+                                            i.deserve_day=date(1111,1,1)
+                                            i.save()
+                                elif not old_nesab_acheived and nesab_acheived:
+                                    for i in list_zakahdetails_all_1:
+                                        if i.active:
+                                            i.start_day=list_zakahdetails_all_1[new_item_index_all].saving_day
+                                            i.deserve_day=list_zakahdetails_all_1[new_item_index_all].saving_day+timedelta(days=354)
+                                            i.save()
 
                     if list_zakahdetails_all_1[new_item_index_all].active==False:
                         list_zakahdetails_all_1[new_item_index_all].start_day=date(1111,1,1)
