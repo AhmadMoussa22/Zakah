@@ -30,13 +30,20 @@ position:relative;
     }
         #top details form
         {
-        height:75%;
+        height:100%;
         width:100%;
         position:absolute;
         left:0;
         bottom:0;
         z-index:1;
         }
+            #top details form input
+            {
+            width:80%;
+            height:33.5%;
+            margin:0;
+            }
+
         #top details summary
         {
         height:100%;
@@ -45,11 +52,10 @@ position:relative;
         left:0;
         top:0;
         }
-        #top details summary h3, #top details summary span
+        #top details summary h3, #top details summary h4
         {
         text-align:center;
         margin-right:30%;
-        background:yellow;
         }
         #top article
         {
@@ -82,6 +88,10 @@ background:green;
 color:white;
 margin-left:25%;
 margin-right:25%;
+}
+input[disabled]
+{
+background:yellow;
 }
 
     section article

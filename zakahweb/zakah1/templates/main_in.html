@@ -25,6 +25,7 @@
         </section>
         <main>
             <section id="step1">
+                <div style="height:50%">
                 <p><span>اولا: </span>دخل بياناتك</p>
                 <form  method="post" action="{%url 'updatedb'%}" autocomplete="off" id="month_save" name="month_save" target="_self">
                     {% csrf_token %}
@@ -40,14 +41,29 @@
                             <th>جرام عيار 24</th>
                         </thead>
                         <tr>
-                            <td><input name="month_save_le" type="number" required placeholder="غير فعال" ></td>
+                            <td><input name="month_save_le" type="number" required placeholder="" ></td>
                             <td><input name="month_save_18" type="number" placeholder="غير فعال" disabled></td>
                             <td><input name="month_save_21" type="number" placeholder="غير فعال" disabled></td>
                             <td><input name="month_save_24" type="number" placeholder="غير فعال" disabled></td>
                         </tr>
                     </table>
-
                 </form>
+                </div>
+                <div style="height:50%">
+                <table>
+                    <thead>
+                        <th>التاريخ</th><th>اجمالي المدخرات</th>
+                    </thead>
+                    <tbody>
+                        {%for i in saving_history%}
+                        <tr>
+                            <td>{{i.0}}</td>
+                            <td>{{i.1}}</td>
+                        </tr>
+                        {%endfor%}
+                    </tbody>
+                </table>
+                </div>
             </section>
             <section id="step2">
                 <p><span>ثانيا: </span>اعرف مقدار زكاتك المستحقة</p>
@@ -64,8 +80,8 @@
                             <tr>
                                 <td>{{i.zakah}}</td>
                                 <td>{{i.date}}</td>
-                                <td><label>نعم</label><input type="radio" name="ij"><br>
-                                <label>ليس بعد</label><input type="radio" name="ij"></td>
+                                <td><ul><li><input type="radio" name={{i.date}}><label>نعم</label></li>
+                                <li><input type="radio" name={{i.date}}><label>ليس بعد</label></li></ul></td>
                             </tr>
                             {%endfor%}
                         </form>

@@ -29,6 +29,8 @@ copy_list=my_aux.list_copy
 def main_f(request):
     mess_main=request.session.get('mes_main')
     request.session['mes_main']=''
+    if mess_main==None:
+        mess_main=''
     nesab=80000
     today_date=date.today()
     xz=date(2020,1,1)
@@ -42,6 +44,7 @@ def main_f(request):
         updatesummary_o = zakah_summary_c.objects.get(username=User.objects.get(username=user_name))
         set_zakahdetails = zakah_register_c.objects.filter(username=User.objects.get(username=user_name),
                                                             active=True)
+        set_zakahdetails_all=zakah_register_c.objects.filter(username=User.objects.get(username=user_name))
         for i in set_zakahdetails:
             if i.deserve_day<=today_date and i.deserve_day>date(1111,1,1):
                 difference_ratio=(today_date-i.start_day).days/354
@@ -50,9 +53,11 @@ def main_f(request):
                 i.deserve_day=i.start_day+timedelta(days=354)
         # creating list of zakah and deserve date to be diplayed in html table
         html_list = []
+        list_zakahdetails = sorted(set_zakahdetails, key=operator.attrgetter('deserve_day'),
+                                   reverse=True)  # transforms set to ordered list
+        list_zakahdetails_all=sorted(set_zakahdetails_all, key=operator.attrgetter('saving_day'),reverse=True)
         if updatesummary_o.total_saving>=nesab:
-            list_zakahdetails=sorted(set_zakahdetails,key=operator.attrgetter('deserve_day'),reverse=True)#transforms set to ordered list
-            #adding all azkah of the same deserve date to be one item
+            #adding all zkah of the same deserve date to be one item
             date1=timedelta(0)
             zakah1=0
             for i in list_zakahdetails:
@@ -72,7 +77,10 @@ def main_f(request):
                 html_list.append({'date':date1, 'zakah': zakah1})
         else:
             html_list = [{'date': "لا يوجد زكاة مستحقة", 'zakah': "لا يوجد زكاة مستحقة"}]
-        return render(request, 'main_in.html', {'full_name':full_name,'mess':mess_main,'required_zakah':html_list})
+        html_history_list=[[i.saving_day,i.saving] for i in list_zakahdetails_all]
+        print html_history_list,88888888888888888888
+        print html_list,99999999999999999999
+        return render(request, 'main_in.html', {'full_name':full_name,'mess':mess_main,'required_zakah':html_list,'saving_history':html_history_list})
     elif request.method=='POST':
         total_saving=request.POST['init_save_le']
         start_date=request.POST['init_save_date']
@@ -246,7 +254,8 @@ def update_DB_f(request):
                             updatedetails_o.pk=old.pk
                             new_item_index_all=list_zakahdetails_all.index(old)
                             list_zakahdetails_all_1=copy.deepcopy(list_zakahdetails_all)
-                            list_zakahdetails_all_1[new_item_index_all]=updatedetails_o
+                            list_zakahdetails_all_1[new_item_index_all].saving=updatedetails_o.saving
+                            list_zakahdetails_all_1[new_item_index_all].nesab_acheived= updatedetails_o.nesab_acheived
                             list_zakahdetails_all_1 = sorted(list_zakahdetails_all_1,
                                                             key=operator.attrgetter('saving_day'))#to be deleted
                             overrided_item=old
@@ -254,6 +263,7 @@ def update_DB_f(request):
                         break
                 if duplicate==False:#if duplicate(same savin_day and saving)-->skip all steps and go to 'return'
                     # if new item not exist add to the list and rearrange
+                    print 'start_day', list_zakahdetails_all_1[new_item_index_all].start_day,'9009'
                     if not override:
                         print 'creat list_zakah_details_all_1 as no duplicate no override'
                         list_zakahdetails_all_1=copy.deepcopy(list_zakahdetails_all)
@@ -305,6 +315,7 @@ def update_DB_f(request):
                         list_zakahdetails_all_1[new_item_index_all].active_saving = net_save_increase
 
                     list_zakahdetails_all_1[new_item_index_all].zakah = 0.025 * int(list_zakahdetails_all_1[new_item_index_all].active_saving)
+                    list_zakahdetails_all_1[new_item_index_all].active=True
                     list_zakahdetails_all_1[new_item_index_all].save()
 
                     ###################################################################################################
@@ -402,6 +413,7 @@ def update_DB_f(request):
                         ################################################################
                         #update/assign active_saving, acive, and zakah
                         if override:
+                            print 'start_day',list_zakahdetails_all_1[new_item_index_all].start_day
                             print 'inside if override'
                             total_active_saving = list_zakahdetails_all[new_item_index_all].active_saving + \
                                                   list_zakahdetails_all[new_item_index_all + 1].active_saving
@@ -618,7 +630,9 @@ def update_DB_f(request):
                                     list_zakahdetails_all_1[new_item_index_all].save()
                                 list_zakahdetails_all_1[new_item_index_all + 1].save()
                             else:#if override
+                                print 'el1',list_zakahdetails_all_1[new_item_index_all].start_day
                                 if noreset and list_zakahdetails_1[next_active_item_index].start_day==list_zakahdetails_1[next_active_item_index].saving_day:
+                                    print 'el2'
                                     if not previous_nesab_acheived:
                                         if not old_nesab_acheived and nesab_acheived:
                                             for i in list_zakahdetails_all_1[:new_item_index_all + 1]:
@@ -636,14 +650,17 @@ def update_DB_f(request):
                                                         next_active_item_index].deserve_day
                                                     i.save()
                                     else:#previous_nesab_acheived
+                                        print 'el3'
                                         if old_nesab_acheived and not nesab_acheived:
                                             for i in list_zakahdetails_all_1[:new_item_index_all + 1]:
+                                                print 'el4'
                                                 if i.active:
                                                     i.start_day = list_zakahdetails_1[next_active_item_index].start_day
                                                     i.deserve_day = list_zakahdetails_1[
                                                         next_active_item_index].deserve_day
                                                     i.save()
                                         elif not old_nesab_acheived and nesab_acheived:
+                                            print 'el5'
                                             list_zakahdetails_all_1[new_item_index_all].start_day = \
                                             list_zakahdetails_all_1[
                                                 new_item_index_all].saving_day
@@ -802,6 +819,7 @@ def update_DB_f(request):
                                                                                                                             -1],
                                                                                                       list_zakahdetails_1)
                         else:#last item overrided
+                            print 'last override', list_zakahdetails_all_1[new_item_index_all].start_day
                             if previous_nesab_acheived:
                                 if old_nesab_acheived and not nesab_acheived:
                                     for i in list_zakahdetails_all_1:
@@ -810,12 +828,14 @@ def update_DB_f(request):
                                             i.deserve_day=date(1111,1,1)
                                             i.save()
                                 elif not old_nesab_acheived and nesab_acheived:
+                                    print 'last elif 222'
                                     list_zakahdetails_all_1[new_item_index_all].start_day = \
                                         list_zakahdetails_all_1[
                                             new_item_index_all].saving_day
                                     list_zakahdetails_all_1[new_item_index_all].deserve_day = \
                                         list_zakahdetails_all_1[
                                             new_item_index_all].saving_day + timedelta(days=354)
+                                    list_zakahdetails_all_1[new_item_index_all].nesab_acheived=True
                                     list_zakahdetails_all_1[new_item_index_all].save()
                                     x = range(0, new_item_index_all)
                                     x.reverse()
@@ -855,10 +875,13 @@ def update_DB_f(request):
                         list_zakahdetails_all_1[new_item_index_all].start_day=date(1111,1,1)
                         list_zakahdetails_all_1[new_item_index_all].deserve_day=date(1111,1,1)
                     list_zakahdetails_all_1[new_item_index_all].save()
+                    print len(list_zakahdetails_all_1),87876565
+                    updatesummary_o.total_saving=list_zakahdetails_all_1[-1].saving
+                    updatesummary_o.save()
+                request.session['mes_main'] = 'تم تحديث بياناتك بنجاح'
             else:
                 monthly_form = monthlysave_form()
                 request.session['mes_main'] = 'برجاء ادخال جميع البيانات بصورة صحيحة'
-        request.session['mes_main'] = 'تم تحديث بياناتك بنجاح'
         return HttpResponseRedirect(reverse('main'))
     request.session['mes_main'] ='برجاء تسجيل الدخول اولا ثم تحديث بيانات مدخراتك'#sending message to main_f function
     return HttpResponseRedirect(reverse('main'))

@@ -30,12 +30,12 @@
         </header>
         <main>
             <section id="step1">
-                <p><span>اولا: </span>دخل بياناتك</p>
+                <p><span>اولا: </span>ادخل بياناتك</p>
                 <form method="post" action="{%url 'main'%}" autocomplete="off" id='init_save' name="init_save" target="_self">
                     {% csrf_token %}
-                    <h4>توقيت دفع اخر زكاة مال/توقيت بلوغ النصاب</h4>
+                    <h4>ادخل توقيت دفع اخر زكاة مال/توقيت بلوغ النصاب</h4>
                     <input type="month" required name="init_save_date">
-                    <h4>اجمالي المدخرات الان</h4>
+                    <h4>ادخل اجمالي المدخرات الان</h4>
                     <table>
                         <thead>
                             <th>جنيه مصري</th>
