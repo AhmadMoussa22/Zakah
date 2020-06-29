@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from .MyClasses import auxilary
-from .formshtml import signin_form, monthlysave_form
+from .formshtml import signin_form, monthlysave_form, signup_form
 from .models import zakah_register_c, zakah_summary_c
 import datetime, operator, time, copy
 from datetime import date,timedelta
@@ -24,7 +24,7 @@ update_values_dates=my_aux.update_objects
 deduct_list=my_aux.list_deducted
 net_deduct=my_aux.calc_net_deduc
 copy_list=my_aux.list_copy
-
+today_date=date.today()
 
 def main_f(request):
     mess_main=request.session.get('mes_main')
@@ -32,7 +32,7 @@ def main_f(request):
     if mess_main==None:
         mess_main=''
     nesab=80000
-    today_date=date.today()
+    #today_date=date.today()
     xz=date(2020,1,1)
     print type(xz), type(today_date)
     a=(today_date-xz).days
@@ -56,30 +56,36 @@ def main_f(request):
         list_zakahdetails = sorted(set_zakahdetails, key=operator.attrgetter('deserve_day'),
                                    reverse=True)  # transforms set to ordered list
         list_zakahdetails_all=sorted(set_zakahdetails_all, key=operator.attrgetter('saving_day'),reverse=True)
+        date1=timedelta(0)
+        zakah1=0
+        #if updatesummary_o.required_zakah==0:
+        #    date1=timedelta(0)
+        #    zakah1=0
+        #else:
+        #    date1=date.today()
+        #    zakah1=updatesummary_o.required_zakah
+        #    html_list.append({'date':date1, 'zakah':zakah1})
         if updatesummary_o.total_saving>=nesab:
             #adding all zkah of the same deserve date to be one item
-            date1=timedelta(0)
-            zakah1=0
             for i in list_zakahdetails:
                 if i.deserve_day!=date(1111,1,1):
                     if date1==i.deserve_day:
                         zakah1=zakah1+i.zakah
-                    elif date1 != timedelta():
+                    elif date1 != timedelta():#to avoid initial values of first iteration
                         html_list.append({'date':date1, 'zakah': zakah1})
                         date1=i.deserve_day
                         zakah1=i.zakah
-                    else:
+                    else:#for the first iteration
                         date1 = i.deserve_day
                         zakah1 = i.zakah
             if zakah1==0:
                 html_list.append({'date':"لا يوجد زكاة مستحقة", 'zakah': "لا يوجد زكاة مستحقة"})
             else:
                 html_list.append({'date':date1, 'zakah': zakah1})
-        else:
+        elif len(html_list)==0:
             html_list = [{'date': "لا يوجد زكاة مستحقة", 'zakah': "لا يوجد زكاة مستحقة"}]
         html_history_list=[[i.saving_day,i.saving] for i in list_zakahdetails_all]
-        print html_history_list,88888888888888888888
-        print html_list,99999999999999999999
+        html_list.reverse()
         return render(request, 'main_in.html', {'full_name':full_name,'mess':mess_main,'required_zakah':html_list,'saving_history':html_history_list})
     elif request.method=='POST':
         total_saving=request.POST['init_save_le']
@@ -91,7 +97,7 @@ def main_f(request):
             year, month = start_date.split('-')
             date_cell=date(int(year),int(month),1)+timedelta(days=354)
             zakah_cell=int(total_saving)*.025
-        return render(request,'main_out2.html',{'date_cell':date_cell,'zakah_cell':zakah_cell,'start_date':start_date,'total_saving':total_saving})
+        return render(request,'main_out2.html',{'date_cell':date_cell,'zakah_cell':zakah_cell,'start_date':start_date,'total_saving':int(total_saving)})
     else:
         return render (request,'main_out1.html',{'mess':mess_main})
 
@@ -104,65 +110,96 @@ def signup_f(request):
     if not request.user.is_authenticated():
         print 1212
         if request.method=='POST':
-            print 1313
-            username=request.POST['username']
-            email=request.POST['email']
-            password=request.POST['password']
-            firstname=request.POST['fname']
-            lastname=request.POST['lname']
-            total_saving_le=request.POST['init_save_le']
-            saving_date=request.POST['init_save_date']
-            year, month = saving_date.split('-')
-            parsed_saving_date = datetime.date(int(year), int(month), 1)
-            try:  # to check for username duplication error
-                print 888888
-                newuser =User.objects.create_user(username, email, password)
-                newuser.first_name=firstname
-                newuser.last_name=lastname
-                print 999
-                newuser.save()
-                print 1111
-                updatesummary_o = zakah_summary_c()
-                updatesummary_o.username = User.objects.get(username=username)
-                updatedetails_o = zakah_register_c()
-                updatedetails_o.username = User.objects.get(username=username)
-                if int(total_saving_le)>=nesab:
-                    updatesummary_o.total_saving = total_saving_le
-                    updatesummary_o.nesab_day = parsed_saving_date
-                    updatesummary_o.required_zakah = 0
-                    updatesummary_o.save()
-                    updatedetails_o.saving_day = parsed_saving_date
-                    updatedetails_o.saving=int(total_saving_le)
-                    updatedetails_o.active_saving=updatedetails_o.saving
-                    updatedetails_o.zakah=updatedetails_o.saving*.025
-                    updatedetails_o.start_day=updatedetails_o.saving_day
-                    updatedetails_o.deserve_day=updatedetails_o.saving_day+timedelta(days=354)
-                    updatedetails_o.net_save_increase=updatedetails_o.saving
-                    updatedetails_o.active=True
-                    updatedetails_o.nesab_acheived=True
-                    updatedetails_o.save()
-                    print 7777777
-                else:
-                    updatesummary_o.total_saving = total_saving_le
-                    updatesummary_o.nesab_day = date(1111,1,1)
-                    updatesummary_o.required_zakah = 0
-                    updatesummary_o.save()
-                    updatedetails_o.saving_day = parsed_saving_date
-                    updatedetails_o.saving = int(total_saving_le)
-                    updatedetails_o.active_saving = updatedetails_o.saving
-                    updatedetails_o.zakah = updatedetails_o.saving * .025
-                    updatedetails_o.start_day = date(1111,1,1)
-                    updatedetails_o.deserve_day = date(1111,1,1)
-                    updatedetails_o.active = True
-                    updatedetails_o.nesab_acheived=False
-                    updatedetails_o.save()
-                    print 44
-                login(request,newuser)
-                request.session['mes_main'] = 'تم انشاء حسابك و تسجيل بياناتك بنجاح'
-                return HttpResponseRedirect(reverse('main'))
-            except:
-                print 141414
-                request.session['mes_main'] = 'اسم المستخدم موجود بالفعل برجاء اختيار اسم اخر'
+            form_up=signup_form(request.POST)
+            print 11221122
+            if form_up.is_valid():
+                print 1313
+                username=form_up.cleaned_data['username']
+                email=form_up.cleaned_data['email']
+                password=form_up.cleaned_data['password']
+                firstname=form_up.cleaned_data['fname']
+                lastname=form_up.cleaned_data['lname']
+                total_saving_le=form_up.cleaned_data['signup_save_le']
+                saving_date=form_up.cleaned_data['signup_save_date']
+                year, month = saving_date.split('-')
+                parsed_saving_date = datetime.date(int(year), int(month), 1)
+                try:  # to check for username duplication error
+                    print 888888
+                    newuser =User.objects.create_user(username, email, password)
+                    newuser.first_name=firstname
+                    newuser.last_name=lastname
+                    print 999
+                    newuser.save()
+                    print 1111
+                    updatesummary_o = zakah_summary_c()
+                    updatesummary_o.username = User.objects.get(username=username)
+                    updatedetails_o = zakah_register_c()
+                    updatedetails_o.username = User.objects.get(username=username)
+                    if int(total_saving_le)>=nesab:
+                        updatesummary_o.total_saving = total_saving_le
+                        updatesummary_o.nesab_day = parsed_saving_date
+                        updatesummary_o.required_zakah = 0
+                        updatesummary_o.save()
+                        updatedetails_o.saving_day = parsed_saving_date
+                        updatedetails_o.saving=int(total_saving_le)
+                        updatedetails_o.active_saving=updatedetails_o.saving
+                        updatedetails_o.zakah=updatedetails_o.saving*.025
+                        updatedetails_o.start_day=updatedetails_o.saving_day
+                        updatedetails_o.deserve_day=updatedetails_o.saving_day+timedelta(days=354)
+                        updatedetails_o.net_save_increase=updatedetails_o.saving
+                        updatedetails_o.active=True
+                        updatedetails_o.nesab_acheived=True
+                        updatedetails_o.save()
+                        print '1-1-1-1-1'
+                        ########## we are assuming that savings amount are the same fron nesab day unti today
+                        if updatedetails_o.saving_day != date(today_date.year,today_date.month,1):
+                            updatedetails_o.saving_day = date(today_date.year,today_date.month,1)
+                            updatedetails_o.pk=None
+                            updatedetails_o.active_saving =0
+                            updatedetails_o.zakah =0
+                            updatedetails_o.start_day=date(1111,1,1)
+                            updatedetails_o.deserve_day=date(1111,1,1)
+                            updatedetails_o.net_save_increase=0
+                            updatedetails_o.active=False
+                            updatedetails_o.save()
+                            print 7777777
+                    else:
+                        updatesummary_o.total_saving = total_saving_le
+                        updatesummary_o.nesab_day = date(1111,1,1)
+                        updatesummary_o.required_zakah = 0
+                        updatesummary_o.save()
+                        updatedetails_o.saving_day = parsed_saving_date
+                        updatedetails_o.saving = int(total_saving_le)
+                        updatedetails_o.active_saving = updatedetails_o.saving
+                        updatedetails_o.zakah = updatedetails_o.saving * .025
+                        updatedetails_o.start_day = date(1111,1,1)
+                        updatedetails_o.deserve_day = date(1111,1,1)
+                        updatedetails_o.net_save_increase=updatedetails_o.saving
+                        updatedetails_o.active = True
+                        updatedetails_o.nesab_acheived=False
+                        updatedetails_o.save()
+                        ########## we are assuming that savings amount are the same fron nesab day unti today
+                        if updatedetails_o.saving_day != date(today_date.year,today_date.month,1):
+                            updatedetails_o.saving_day = date(today_date.year,today_date.month,1)
+                            updatedetails_o.pk=None
+                            updatedetails_o.active_saving =0
+                            updatedetails_o.zakah =0
+                            updatedetails_o.start_day = date(1111,1,1)
+                            updatedetails_o.deserve_day = date(1111,1,1)
+                            updatedetails_o.net_save_increase=0
+                            updatedetails_o.active = False
+                            updatedetails_o.save()
+                            print 44
+                    login(request,newuser)
+                    request.session['mes_main'] = 'تم انشاء حسابك و تسجيل بياناتك بنجاح'
+                    return HttpResponseRedirect(reverse('main'))
+                except Exception as err:
+                    print 141414, err, err.args, type(err)
+                    request.session['mes_main'] = 'اسم المستخدم موجود بالفعل برجاء اختيار اسم اخر'
+            else:
+                form_up=signup_form(request.POST)
+                print 114411441144
+                request.session['mes_main'] = 'برجاء ادخال جميع البيانات بصورة صحيحة'
     else:
         print 15515
         request.session['mes_main'] = 'انت بالمفعل مسجل دخولك'
@@ -201,7 +238,9 @@ def signin_f(request):
 def update_DB_f(request):
     if request.user.is_authenticated():#check user logged in else redirect to signin with message
         user_name = request.user.username
+        print 'user logged in with username=',user_name
         if request.method == 'POST':
+            print 'update requsted'
             updatedetails_o = zakah_register_c()
             updatesummary_o = zakah_summary_c.objects.get(username=User.objects.get(username=user_name))
             nesab = 80000
@@ -212,7 +251,7 @@ def update_DB_f(request):
                 saving_amount = monthly_form.cleaned_data['month_save_le']
                 year, month = saving_date.split('-')
                 parsed_saving_date = datetime.date(int(year), int(month), 1)
-
+                print 'data read from html form: saving date, saving amount'
                 ###############################################################################
                 ### assign fixed values to object(username, saving, saving_day, nesab_acheived -- default values assigned through class inModels.py
                 updatedetails_o.username = User.objects.get(username=user_name)
@@ -261,11 +300,11 @@ def update_DB_f(request):
                             overrided_item=old
                             #if override and no duplicate create the new list(with the new item added and keep the old)
                         break
+                print 'duplicate=',duplicate, 'override=',override
                 if duplicate==False:#if duplicate(same savin_day and saving)-->skip all steps and go to 'return'
                     # if new item not exist add to the list and rearrange
-                    print 'start_day', list_zakahdetails_all_1[new_item_index_all].start_day,'9009'
                     if not override:
-                        print 'creat list_zakah_details_all_1 as no duplicate no override'
+                        print 'creat list_zakahdetails_all_1 as no duplicate no override'
                         list_zakahdetails_all_1=copy.deepcopy(list_zakahdetails_all)
                         list_zakahdetails_all_1.append(updatedetails_o)
                         list_zakahdetails_all_1=sorted(list_zakahdetails_all_1,key=operator.attrgetter('saving_day'))
@@ -286,9 +325,14 @@ def update_DB_f(request):
                         list_zakahdetails_all_1[new_item_index_all].net_save_increase = net_save_increase
                     # assign value of next item net_save_increase(if not the last item in the list)
                     if new_item_index_all<length_list_all-1:
-                        print 'new item index is not the first nor the last'
+                        print 'new item index is not the last'
                         list_zakahdetails_all_1[new_item_index_all + 1].net_save_increase=77777#to be deleted
                         list_zakahdetails_all_1[new_item_index_all + 1].net_save_increase=list_zakahdetails_all_1[new_item_index_all+1].saving-list_zakahdetails_all_1[new_item_index_all].saving
+                        if list_zakahdetails_all_1[new_item_index_all+1].net_save_increase<0:
+                            list_zakahdetails_all_1[new_item_index_all+1].active_saving = 0
+                            list_zakahdetails_all_1[new_item_index_all+1].active = False
+                            list_zakahdetails_all_1[new_item_index_all+1].start_day=date(1111,1,1)
+                            list_zakahdetails_all_1[new_item_index_all+1].deserve_day=date(1111,1,1)
 ########################################################################################################################
 # So far: Old and new list_all created and arranged ascendig
 #         Only old(not new) list created and arranged acending
@@ -311,16 +355,20 @@ def update_DB_f(request):
                     if net_save_increase <= 0:
                         list_zakahdetails_all_1[new_item_index_all].active_saving = 0
                         list_zakahdetails_all_1[new_item_index_all].active = False
+                        list_zakahdetails_all_1[new_item_index_all].start_day=date(1111,1,1)
+                        list_zakahdetails_all_1[new_item_index_all].deserve_day=date(1111,1,1)
                     else:
                         list_zakahdetails_all_1[new_item_index_all].active_saving = net_save_increase
-
+                        list_zakahdetails_all_1[new_item_index_all].active=True
                     list_zakahdetails_all_1[new_item_index_all].zakah = 0.025 * int(list_zakahdetails_all_1[new_item_index_all].active_saving)
-                    list_zakahdetails_all_1[new_item_index_all].active=True
                     list_zakahdetails_all_1[new_item_index_all].save()
 
                     ###################################################################################################
                     if new_item_index_all==0:
+                        print 'new item is the first item'
+                        print 'assign active saving group'
                         if not override:
+                            print '1st item and no override act_sav'
                             if list_zakahdetails_all_1[0].net_save_increase>=list_zakahdetails_all[0].active_saving:
                                 list_zakahdetails_all_1[0].active_saving=list_zakahdetails_all[0].active_saving
                                 list_zakahdetails_all_1[1].active_saving=0
@@ -341,35 +389,46 @@ def update_DB_f(request):
                                 list_zakahdetails_all_1[1].deserve_day = date(1111, 1, 1)
                             else:
                                 list_zakahdetails_all_1[1].active = True
-                                list_zakahdetails_all_1[1].zakah = 0.025 * list_zakahdetails_all_1[0].active_saving
+                                list_zakahdetails_all_1[1].zakah = 0.025 * list_zakahdetails_all_1[1].active_saving
                             list_zakahdetails_all_1[1].save()
                         else:#if override
+                            print '1st item and override act_sav'
                             if len(list_zakahdetails_all_1)>1:#list has more than 1 item
+                                print '1st item override list has mor than 1 item act_sav'
                                 total_active_saving_0=list_zakahdetails_all[0].active_saving+list_zakahdetails_all[1].active_saving
+                                print 'total active saving_0= ',total_active_saving_0
+                                print 'list_zakahdetails_all_1[0].net_save_increase = ',list_zakahdetails_all_1[0].net_save_increase
                                 if list_zakahdetails_all_1[0].net_save_increase >= total_active_saving_0:
+                                    print 'inside if if list_zakahdetails_all_1[0].net_save_increase >= total_active_saving_0'
                                     list_zakahdetails_all_1[0].active_saving = total_active_saving_0
                                     list_zakahdetails_all_1[1].active_saving = 0
                                 else:
+                                    print 'inside else; i.e. if list_zakahdetails_all_1[0].net_save_increase < total_active_saving_0'
                                     list_zakahdetails_all_1[0].active_saving = list_zakahdetails_all_1[0].net_save_increase
                                     list_zakahdetails_all_1[1].active_saving = total_active_saving_0-list_zakahdetails_all_1[0].net_save_increase
                                 if list_zakahdetails_all_1[0].active_saving == 0:
+                                    print 'if act[0] =0'
                                     list_zakahdetails_all_1[0].active = False
                                     list_zakahdetails_all_1[0].zakah = 0
                                 else:
+                                    print 'else act[0]!=0'
                                     list_zakahdetails_all_1[0].active = True
                                     list_zakahdetails_all_1[0].zakah = 0.025 * list_zakahdetails_all_1[0].active_saving
                                 # assign values of active_saving and active for first item
                                 if list_zakahdetails_all_1[1].active_saving == 0:
+                                    print 'if act[1]=0'
                                     list_zakahdetails_all_1[1].active = False
                                     list_zakahdetails_all_1[1].zakah = 0
                                     list_zakahdetails_all_1[1].start_day = date(1111, 1, 1)
                                     list_zakahdetails_all_1[1].deserve_day = date(1111, 1, 1)
                                 else:
+                                    print 'else act[1]!=0'
                                     list_zakahdetails_all_1[1].active = True
-                                    list_zakahdetails_all_1[1].zakah = 0.025 * list_zakahdetails_all_1[0].active_saving
+                                    list_zakahdetails_all_1[1].zakah = 0.025 * list_zakahdetails_all_1[1].active_saving
                                 list_zakahdetails_all_1[1].save()
 
                             else:#list has only 1 item
+                                print'1st item - override - list with only 1 item act_sav'
                                 list_zakahdetails_all_1[0].active_saving = list_zakahdetails_all_1[0].net_save_increase
                                 if list_zakahdetails_all_1[0].active_saving == 0:
                                     list_zakahdetails_all_1[0].active = False
@@ -379,6 +438,7 @@ def update_DB_f(request):
                                     list_zakahdetails_all_1[0].zakah = 0.025 * list_zakahdetails_all_1[0].active_saving
 
                         ##assign values for start_day and deserve_day of the current item
+                        print '1st item, then assign values for start_day and deserve_day of the current item'
                         list_zakahdetails_1 = []
                         # create list_zakahdetails_1 which contains all active items excluding the latest item
                         for i in list_zakahdetails_all_1:
@@ -386,25 +446,87 @@ def update_DB_f(request):
                                 list_zakahdetails_1 += [i]
                         #assign values of dates
                         if length_list_all>1:
-                            if nesab_acheived and list_zakahdetails_1[1].start_day==list_zakahdetails_1[1].saving_day:
+
+                            print '1st item-list has more than 1 item dates'
+                            print '1st item-list has more than 1 item - adjust next item dates'
+                            print 'override=',override, 'list_zakahdetails_all[1].active',list_zakahdetails_all[1].active,'list_zakahdetails_all_1[1].active',list_zakahdetails_all_1[1].active
+                            if override and not list_zakahdetails_all[1].active and list_zakahdetails_all_1[1].active:
+                                print'1st item-list has more than 1 item-override-next items - dates'
+                                if not list_zakahdetails_all_1[1].nesab_acheived:
+                                    print'1st item-list has more than 1 item- override - next item - nesab not acheived - dates'
+                                    list_zakahdetails_all_1[1].start_day = date(1111,1,1)#initial values in case no activ items next
+                                    list_zakahdetails_all_1[1].deserve_day = date(1111,1,1)
+                                    if length_list_all>2:
+                                        for i in list_zakahdetails_all_1[2:]:
+                                            print 'inside for'
+                                            print'i.saving_day=',i.saving_day,'i.active=',i.active,'i.start_day=',i.start_day
+                                            if i.active:
+                                                list_zakahdetails_all_1[1].start_day = i.start_day
+                                                list_zakahdetails_all_1[1].deserve_day = i.deserve_day
+                                                break
+                                else:
+                                    print'1st item-list has more than 1 item- override - next item - nesab acheived - dates'
+                                    sw=True#initial value
+                                    list_zakahdetails_all_1[1].start_day=list_zakahdetails_all_1[1].saving_day
+                                    list_zakahdetails_all_1[1].deserve_day=list_zakahdetails_all_1[1].saving_day+timedelta(days=354)
+                                    if length_list_all>2:
+                                        for i in list_zakahdetails_all_1[2:]:
+                                            print 'inside for'
+                                            print'i.saving_day=',i.saving_day,'i.active=',i.active,'i.start_day=',i.start_day,'sw=',sw,'i.nesab_acheived=',i.nesab_acheived
+                                            if not i.nesab_acheived and sw:
+                                                if i.active:
+                                                    list_zakahdetails_all_1[1].start_day = i.start_day
+                                                    list_zakahdetails_all_1[1].deserve_day = i.deserve_day
+                                                sw=False
+                                            elif i.active and not sw:
+                                                list_zakahdetails_all_1[1].start_day = i.start_day
+                                                list_zakahdetails_all_1[1].deserve_day = i.deserve_day
+                                list_zakahdetails_all_1[1].save()
+
+                            if nesab_acheived:
+                                sw=True#initial value
                                 list_zakahdetails_all_1[0].start_day=list_zakahdetails_all_1[0].saving_day
-                                list_zakahdetails_all_1[0].deserve_day = list_zakahdetails_all_1[0].saving_day+timedelta(days=354)
+                                list_zakahdetails_all_1[0].deserve_day=list_zakahdetails_all_1[0].saving_day+timedelta(days=354)
+                                for i in list_zakahdetails_all_1[1:]:
+                                    print 'inside for'
+                                    print'i.saving_day=',i.saving_day,'i.active=',i.active,'i.start_day=',i.start_day,'sw=',sw,'i.nesab_acheived=',i.nesab_acheived
+                                    if not i.nesab_acheived and sw:
+                                        if i.active:
+                                            list_zakahdetails_all_1[1].start_day = i.start_day
+                                            list_zakahdetails_all_1[1].deserve_day = i.deserve_day
+                                        sw=False
+                                    elif i.active and not sw:
+                                        list_zakahdetails_all_1[1].start_day = i.start_day
+                                        list_zakahdetails_all_1[1].deserve_day = i.deserve_day
+                                list_zakahdetails_all_1[1].save()
+
                             elif list_zakahdetails_all_1[0].active:
-                                list_zakahdetails_all_1[0].start_day = list_zakahdetails_1[1].start_day
-                                list_zakahdetails_all_1[0].deserve_day = list_zakahdetails_1[1].deserve_day
+                                print '1st item-list has more than 1 item dates elif 1;'
+                                list_zakahdetails_all_1[0].start_day = date(1111,1,1)#initial values in case no activ items next
+                                list_zakahdetails_all_1[0].deserve_day = date(1111,1,1)
+                                for i in list_zakahdetails_all_1[1:]:
+                                    if i.active:
+                                        list_zakahdetails_all_1[0].start_day = list_zakahdetails_1[1].start_day
+                                        list_zakahdetails_all_1[0].deserve_day = list_zakahdetails_1[1].deserve_day
+                                        break
                             else:
+                                print '1st item-list has more than 1 item dates else 1'
                                 list_zakahdetails_all_1[0].start_day = date(1111,1,1)
                                 list_zakahdetails_all_1[0].deserve_day = date(1111,1,1)
+
+
                         elif nesab_acheived:#new item is the only item and nesab_acheived
+                            print '1st item-list has only 1 item-nesab_acheived-dates'
                             list_zakahdetails_all_1[0].start_day = list_zakahdetails_all_1[0].saving_day
                             list_zakahdetails_all_1[0].deserve_day = list_zakahdetails_all_1[0].saving_day + timedelta(
                                 days=354)
                         else:#new item is the only item and not nesab_acheived
+                            print '1st item-list has only 1 item-nesab_not_acheived-dates'
                             list_zakahdetails_all_1[0].start_day = date(1111, 1, 1)
                             list_zakahdetails_all_1[0].deserve_day = date(1111, 1, 1)
                         list_zakahdetails_all_1[0].save()
 
-                    elif new_item_index_all<length_list_all-1:#new item not the latest item saving date
+                    elif new_item_index_all<length_list_all-1:#new item not the latest item saving date nor the first
                         #update the next item net_save_increase
                         list_zakahdetails_all_1[new_item_index_all+1].net_save_increase=list_zakahdetails_all_1[new_item_index_all+1].saving-list_zakahdetails_all_1[new_item_index_all].saving
                         list_zakahdetails_all_1[new_item_index_all+1].save()
@@ -447,9 +569,11 @@ def update_DB_f(request):
                                 #calculate the new active_saving of new_item_index_all+1
                                 if list_zakahdetails_all_1[new_item_index_all+1].net_save_increase<=0 or abs(net_deduct(list_zakahdetails_all_1[new_item_index_all+2:]))>list_zakahdetails_all_1[new_item_index_all+1].net_save_increase:
                                     list_zakahdetails_all_1[new_item_index_all+1].active_saving=0
+                                    list_zakahdetails_all_1[new_item_index_all+1].active=False
                                     print 'if 1'
                                 elif len(list_zakahdetails_all_1)==new_item_index_all+2:
                                     list_zakahdetails_all_1[new_item_index_all+1].active_saving=list_zakahdetails_all_1[new_item_index_all+1].net_save_increase
+                                    list_zakahdetails_all_1[new_item_index_all+1].active=True
                                     print 'if 2'
                                 else:
                                     print 'if 3'
@@ -482,14 +606,17 @@ def update_DB_f(request):
                                     print 'inside else case1/2/3-1'
                                     list_zakahdetails_all_1[new_item_index_all].active_saving=list_zakahdetails_all_1[new_item_index_all].net_save_increase
                                     list_zakahdetails_all_1[new_item_index_all].zakah =.025*int(list_zakahdetails_all_1[new_item_index_all].active_saving)
+                                    list_zakahdetails_all_1[new_item_index_all].active=True
                                     list_zakahdetails_all_1[new_item_index_all+1].active_saving=total_active_saving-list_zakahdetails_all_1[new_item_index_all].active_saving
                                     list_zakahdetails_all_1[new_item_index_all+1].zakah =.025*int(list_zakahdetails_all_1[new_item_index_all+1].active_saving)
+                                    list_zakahdetails_all_1[new_item_index_all+1].active=True
                                 else:
                                     print 'inside else case1/2/3-2'
                                     list_zakahdetails_all_1[new_item_index_all].active_saving=total_active_saving
                                     list_zakahdetails_all_1[new_item_index_all].zakah =.025*int(list_zakahdetails_all_1[new_item_index_all].active_saving)
                                     list_zakahdetails_all_1[new_item_index_all+1].active_saving=0
                                     list_zakahdetails_all_1[new_item_index_all + 1].zakah =0
+                                    list_zakahdetails_all_1[new_item_index_all+1].active=False
                                 if list_zakahdetails_all_1[new_item_index_all].net_save_increase<=0 or list_zakahdetails_all_1[new_item_index_all].active_saving==0:
                                     print 'inside else case1/2/3-3'
                                     list_zakahdetails_all_1[new_item_index_all].active_saving=0
@@ -579,14 +706,17 @@ def update_DB_f(request):
                                 list_zakahdetails_all_1[new_item_index_all+1].active_saving =list_zakahdetails_all_1[new_item_index_all+1].active_saving-list_zakahdetails_all_1[new_item_index_all].active_saving
                                 list_zakahdetails_all_1[new_item_index_all+1].zakah = .025 * int(
                                     list_zakahdetails_all_1[new_item_index_all+1].active_saving)
+                                list_zakahdetails_all_1[new_item_index_all+1].active=True
                                 list_zakahdetails_all_1[new_item_index_all+1].save()
-                #####################################################################################################################
+                        ######################################################################################
+
+                        #################################################################################################################
                         #new item is neither the first nor the last item
-                ######################################################################################################################
+                        ##############################################################################################################
                         #assign start_day and desreve_day for the new and update the old if needed
                         # create list_zakahdetails_1 which contains all 'active' items excluding the latest item
 
-                    ################################################################################################################
+                        ############################################################################################################
                         list_zakahdetails_1=[]#inital value
                         for i in list_zakahdetails_all_1:
                             if i.active:
@@ -629,9 +759,10 @@ def update_DB_f(request):
                                     list_zakahdetails_all_1[new_item_index_all].deserve_day = list_zakahdetails_1[next_active_item_index].deserve_day
                                     list_zakahdetails_all_1[new_item_index_all].save()
                                 list_zakahdetails_all_1[new_item_index_all + 1].save()
-                            else:#if override
+                            else:#if override(new item is not the last active item)
                                 print 'el1',list_zakahdetails_all_1[new_item_index_all].start_day
                                 if noreset and list_zakahdetails_1[next_active_item_index].start_day==list_zakahdetails_1[next_active_item_index].saving_day:
+                                #no reset till last item
                                     print 'el2'
                                     if not previous_nesab_acheived:
                                         if not old_nesab_acheived and nesab_acheived:
@@ -680,11 +811,29 @@ def update_DB_f(request):
                                                         list_zakahdetails_all_1[i].deserve_day=list_zakahdetails_all_1[i].saving_day+timedelta(days=354)
                                                         list_zakahdetails_all_1[i].save()
                                                 else:
+                                                    if sw==False:
+                                                        date_o=list_zakahdetails_all_1[i+1].saving_day
                                                     sw=True
                                                     if list_zakahdetails_all_1[i].active:
                                                         list_zakahdetails_all_1[i].start_day=date_o
                                                         list_zakahdetails_all_1[i].deserve_day=date_o+timedelta(days=354)
                                                         list_zakahdetails_all_1[i].save()
+                                        elif old_nesab_acheived and nesab_acheived and not overrided_item.active and list_zakahdetails_all_1[new_item_index_all].active:
+                                                list_zakahdetails_all_1[new_item_index_all].start_day = \
+                                                list_zakahdetails_all_1[
+                                                    new_item_index_all].saving_day
+                                                list_zakahdetails_all_1[new_item_index_all].deserve_day = \
+                                                list_zakahdetails_all_1[
+                                                    new_item_index_all].saving_day + timedelta(days=354)
+                                                list_zakahdetails_all_1[new_item_index_all].save()
+
+
+                                elif previous_nesab_acheived and old_nesab_acheived and nesab_acheived and not overrided_item.active and list_zakahdetails_all_1[new_item_index_all].active:
+                                #'elif'='el'+'if'--> 'el'=reset happened later,'if' = other conditions mentioned
+                                    list_zakahdetails_all_1[new_item_index_all].start_day = list_zakahdetails_1[next_active_item_index].saving_day+timedelta(days=354)
+                                    list_zakahdetails_all_1[new_item_index_all].deserve_day = list_zakahdetails_1[next_active_item_index].saving_day+timedelta(days=354)
+                                    list_zakahdetails_all_1[new_item_index_all].save()
+
                         else:#if the new item has no active item next
                             if not override:
                                 if previous_nesab_acheived and nesab_acheived and list_zakahdetails_all_1[-1].nesab_acheived:
@@ -728,6 +877,15 @@ def update_DB_f(request):
                                                 list_zakahdetails_all_1[i].start_day = date_o
                                                 list_zakahdetails_all_1[i].deserve_day = date_o + timedelta(days=354)
                                                 list_zakahdetails_all_1[i].save()
+                                elif previous_nesab_acheived and old_nesab_acheived and nesab_acheived and list_zakahdetails_all_1[-1].nesab_acheived :
+                                    if not overrided_item.active and list_zakahdetails_all_1[new_item_index_all].active:
+                                        list_zakahdetails_all_1[new_item_index_all].start_day = \
+                                        list_zakahdetails_all_1[
+                                                new_item_index_all].saving_day
+                                        list_zakahdetails_all_1[new_item_index_all].deserve_day = \
+                                            list_zakahdetails_all_1[
+                                                new_item_index_all].saving_day + timedelta(days=354)
+                                        list_zakahdetails_all_1[new_item_index_all].save()
                                 elif not previous_nesab_acheived and not old_nesab_acheived and nesab_acheived and list_zakahdetails_all_1[-1].nesab_acheived:
                                     for i in list_zakahdetails_all_1[:new_item_index_all + 1]:
                                         if i.active:
@@ -737,7 +895,59 @@ def update_DB_f(request):
                                                 days=354)
                                             i.save()
 
-
+                        ######## To adjust start and deserve day of next item if it was inactive then became active
+                        if override:
+                            old_nse_1=list_zakahdetails_all_1[new_item_index_all+1].saving-overrided_item.saving
+                        else:
+                            old_nse_1=list_zakahdetails_all_1[new_item_index_all+1].saving-list_zakahdetails_all_1[new_item_index_all-1].saving
+                        print 'old_nse_1= ',old_nse_1
+                        if old_nse_1<0 and list_zakahdetails_all_1[new_item_index_all+1].net_save_increase>=0:
+                            #next item was not active then became active
+                            print 'next item was not active then became active'
+                            if list_zakahdetails_all_1[new_item_index_all+1].nesab_acheived and list_zakahdetails_all_1[new_item_index_all+1].saving_day==list_zakahdetails_all_1[-1].saving_day:
+                            #next item is the last item
+                                list_zakahdetails_all_1[new_item_index_all+1].start_day = list_zakahdetails_all_1[new_item_index_all+1].saving_day
+                                list_zakahdetails_all_1[new_item_index_all+1].deserve_day = list_zakahdetails_all_1[new_item_index_all+1].saving_day+ timedelta(days=354)
+                                list_zakahdetails_all_1[new_item_index_all+1].save()
+                            else:#next item is not the last item
+                                noreset_1=True#initial value
+                                next_active_1=None
+                                for i in list_zakahdetails_all_1[new_item_index_all+2:]:
+                                    if not i.nesab_acheived and noreset_1:
+                                        noreset_1=False
+                                        if i.active:
+                                            next_active_1=i
+                                            break
+                                    else:
+                                        if i.active:
+                                            next_active_1=i
+                                            break
+                                if list_zakahdetails_all_1[new_item_index_all+1].nesab_acheived:
+                                    print "next_active_1 saving date",next_active_1.saving_day
+                                    if next_active_1!=None:
+                                        print "next active item != none"
+                                        if noreset_1 and next_active_1.start_day==next_active_1.saving_day:
+                                            list_zakahdetails_all_1[new_item_index_all+1].start_day=list_zakahdetails_all_1[new_item_index_all+1].saving_day
+                                            list_zakahdetails_all_1[new_item_index_all+1].deserve_day=list_zakahdetails_all_1[new_item_index_all+1].saving_day+timedelta(days=354)
+                                            list_zakahdetails_all_1[new_item_index_all+1].save()
+                                            print "inside if 1",list_zakahdetails_all_1[new_item_index_all+1].start_day
+                                        else:
+                                            list_zakahdetails_all_1[new_item_index_all+1].start_day=next_active_1.start_day
+                                            list_zakahdetails_all_1[new_item_index_all+1].deserve_day=next_active_1.deserve_day
+                                            list_zakahdetails_all_1[new_item_index_all+1].save()
+                                            print "inside else 1"
+                                    elif noreset_1:
+                                        print "elif noreset_1"
+                                        list_zakahdetails_all_1[new_item_index_all+1].start_day=next_active_1.start_day
+                                        list_zakahdetails_all_1[new_item_index_all+1].deserve_day=next_active_1.deserve_day
+                                        list_zakahdetails_all_1[new_item_index_all+1].save()
+                                else:#Nesab not acheived
+                                    print '5555', next_active_1.saving_day, next_active_1.start_day
+                                    if next_active_1!=None:
+                                        print '9999999999'
+                                        list_zakahdetails_all_1[new_item_index_all+1].start_day=next_active_1.start_day
+                                        list_zakahdetails_all_1[new_item_index_all+1].deserve_day=next_active_1.deserve_day
+                                        list_zakahdetails_all_1[new_item_index_all+1].save()
                     ####################################################################################################
 
                     else:# new item is the last item
@@ -792,7 +1002,14 @@ def update_DB_f(request):
                                         list_zakahdetails_all_1[index].active_saving
                                     if net_save_increase<0:
                                         seq_deduct(net_save_increase, list_zakahdetails_all_1[:new_item_index_all])
-
+                                    if previous_nesab_acheived and old_nesab_acheived and nesab_acheived and not overrided_item.active and list_zakahdetails_all_1[new_item_index_all].active:
+                                        list_zakahdetails_all_1[new_item_index_all].start_day = \
+                                        list_zakahdetails_all_1[
+                                                new_item_index_all].saving_day
+                                        list_zakahdetails_all_1[new_item_index_all].deserve_day = \
+                                            list_zakahdetails_all_1[
+                                                new_item_index_all].saving_day + timedelta(days=354)
+                                        list_zakahdetails_all_1[new_item_index_all].save()
 
                         else:#without override
                             print 'a3'
@@ -857,6 +1074,15 @@ def update_DB_f(request):
                                                 list_zakahdetails_all_1[i].start_day = date_o
                                                 list_zakahdetails_all_1[i].deserve_day = date_o + timedelta(days=354)
                                                 list_zakahdetails_all_1[i].save()
+                                elif net_save_increase>0:
+                                    list_zakahdetails_all_1[new_item_index_all].start_day = \
+                                        list_zakahdetails_all_1[
+                                            new_item_index_all].saving_day
+                                    list_zakahdetails_all_1[new_item_index_all].deserve_day = \
+                                        list_zakahdetails_all_1[
+                                            new_item_index_all].saving_day + timedelta(days=354)
+                                    list_zakahdetails_all_1[new_item_index_all].save()
+
                             else:#previous_nesab not acheived
                                 if old_nesab_acheived and not nesab_acheived:
                                     for i in list_zakahdetails_all_1:

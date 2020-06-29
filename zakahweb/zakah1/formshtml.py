@@ -15,7 +15,13 @@ class monthlysave_form(forms.Form):
     month_save_date=forms.CharField(max_length=100)
     month_save_le=forms.IntegerField()
 class signup_form(forms.Form):
-    init_save_date=forms.DateField()
-    init_save_le=forms.IntegerField()
+    fname=forms.CharField(max_length=100)
+    lname=forms.CharField(max_length=100)
+    username=forms.CharField(max_length=100)
+    email=forms.EmailField()
+    password=forms.CharField(widget=forms.PasswordInput(),max_length=20)
+    signup_save_date=forms.CharField(max_length=50)
+    signup_save_le=forms.IntegerField()
+
 class initzakah_form(forms.Form):
     pass
