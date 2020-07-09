@@ -405,23 +405,25 @@ def update_DB_f(request):
                                                   list_zakahdetails_all[new_item_index_all + 1].active_saving
 
                             case1=overrided_item.net_save_increase>0 and list_zakahdetails_all_1[new_item_index_all+1].net_save_increase>0 and net_save_increase<=0
-                            case2=overrided_item.net_save_increase<0 and overrided_item.saving<list_zakahdetails_all_1[new_item_index_all+1].saving
-                            case3=overrided_item.net_save_increase<0 and overrided_item.saving>list_zakahdetails_all_1[new_item_index_all+1].saving and list_zakahdetails_all_1[new_item_index_all+1].net_save_increase>0
+                            case2=overrided_item.net_save_increase<=0 and overrided_item.saving<list_zakahdetails_all_1[new_item_index_all+1].saving
+                            case3=overrided_item.net_save_increase<=0 and overrided_item.saving>list_zakahdetails_all_1[new_item_index_all+1].saving and list_zakahdetails_all_1[new_item_index_all+1].net_save_increase>0
                             ##readjust active saving of preious items and next item -if needed-
                             #return the old deduct then execute the new deduct
                             # calculate the new active_saving of next item
                             # execute the new deduct(upper deduct and -ve net save increase of next item) for previous and new item active saving
                             if case1 or case2 or case3:
+                                print 'case2=',case2
                                 #return the old deducted
                                 upper_deduct=net_deduct(list_zakahdetails_all[new_item_index_all:])
                                 deduction_list=deduct_list(list_zakahdetails_all_1[:new_item_index_all],upper_deduct)
                                 list_zakahdetails_all_1=return_deducted(list_zakahdetails_all_1,deduction_list)
-
+                                print 'upper_deduct=',upper_deduct
+                                print 'deduction_list=',deduction_list
                                 #calculate the new active_saving of new_item_index_all+1
                                 if list_zakahdetails_all_1[new_item_index_all+1].net_save_increase<=0 or abs(net_deduct(list_zakahdetails_all_1[new_item_index_all+2:]))>list_zakahdetails_all_1[new_item_index_all+1].net_save_increase:
                                     list_zakahdetails_all_1=set_item_inactive(list_zakahdetails_all_1,new_item_index_all+1)
                                     list_zakahdetails_all_1[new_item_index_all+1].active_saving=0
-
+                                    print 'if 1'
                                 elif len(list_zakahdetails_all_1)==new_item_index_all+2:
                                     list_zakahdetails_all_1[new_item_index_all+1].active_saving=list_zakahdetails_all_1[new_item_index_all+1].net_save_increase
                                     print 'if 2'
@@ -436,10 +438,13 @@ def update_DB_f(request):
                                 list_zakahdetails_all_1[new_item_index_all+1].save()
                                 #execute the new deduct(upper deduct and -ve net save increase of next item) for previous and new item active saving
                                 upper_deduct_1=net_deduct(list_zakahdetails_all_1[new_item_index_all+1:])
-                                if list_zakahdetails_all_1[new_item_index_all].net_save_increase<0:
+                                print 'upper_deduct_1=',upper_deduct_1
+                                if list_zakahdetails_all_1[new_item_index_all].net_save_increase<=0:
                                     total_deduct=upper_deduct_1+list_zakahdetails_all_1[new_item_index_all].net_save_increase
                                     seq_deduct(total_deduct,list_zakahdetails_all_1[:new_item_index_all])
                                 else:
+                                    print 'else'
+                                    list_zakahdetails_all_1[new_item_index_all].active_saving=net_save_increase
                                     seq_deduct(upper_deduct_1,list_zakahdetails_all_1[:new_item_index_all+1])
                             else:
                                 if total_active_saving>list_zakahdetails_all_1[new_item_index_all].net_save_increase:
