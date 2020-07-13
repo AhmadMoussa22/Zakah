@@ -405,23 +405,25 @@ def update_DB_f(request):
                                                   list_zakahdetails_all[new_item_index_all + 1].active_saving
 
                             case1=overrided_item.net_save_increase>0 and list_zakahdetails_all_1[new_item_index_all+1].net_save_increase>0 and net_save_increase<=0
-                            case2=overrided_item.net_save_increase<0 and overrided_item.saving<list_zakahdetails_all_1[new_item_index_all+1].saving
-                            case3=overrided_item.net_save_increase<0 and overrided_item.saving>list_zakahdetails_all_1[new_item_index_all+1].saving and list_zakahdetails_all_1[new_item_index_all+1].net_save_increase>0
+                            case2=overrided_item.net_save_increase<=0 and overrided_item.saving<list_zakahdetails_all_1[new_item_index_all+1].saving
+                            case3=overrided_item.net_save_increase<=0 and overrided_item.saving>list_zakahdetails_all_1[new_item_index_all+1].saving and list_zakahdetails_all_1[new_item_index_all+1].net_save_increase>0
                             ##readjust active saving of preious items and next item -if needed-
                             #return the old deduct then execute the new deduct
                             # calculate the new active_saving of next item
                             # execute the new deduct(upper deduct and -ve net save increase of next item) for previous and new item active saving
                             if case1 or case2 or case3:
+                                print 'case2=',case2
                                 #return the old deducted
                                 upper_deduct=net_deduct(list_zakahdetails_all[new_item_index_all:])
                                 deduction_list=deduct_list(list_zakahdetails_all_1[:new_item_index_all],upper_deduct)
                                 list_zakahdetails_all_1=return_deducted(list_zakahdetails_all_1,deduction_list)
-
+                                print 'upper_deduct=',upper_deduct
+                                print 'deduction_list=',deduction_list
                                 #calculate the new active_saving of new_item_index_all+1
                                 if list_zakahdetails_all_1[new_item_index_all+1].net_save_increase<=0 or abs(net_deduct(list_zakahdetails_all_1[new_item_index_all+2:]))>list_zakahdetails_all_1[new_item_index_all+1].net_save_increase:
                                     list_zakahdetails_all_1=set_item_inactive(list_zakahdetails_all_1,new_item_index_all+1)
                                     list_zakahdetails_all_1[new_item_index_all+1].active_saving=0
-
+                                    print 'if 1'
                                 elif len(list_zakahdetails_all_1)==new_item_index_all+2:
                                     list_zakahdetails_all_1[new_item_index_all+1].active_saving=list_zakahdetails_all_1[new_item_index_all+1].net_save_increase
                                     print 'if 2'
@@ -436,10 +438,13 @@ def update_DB_f(request):
                                 list_zakahdetails_all_1[new_item_index_all+1].save()
                                 #execute the new deduct(upper deduct and -ve net save increase of next item) for previous and new item active saving
                                 upper_deduct_1=net_deduct(list_zakahdetails_all_1[new_item_index_all+1:])
-                                if list_zakahdetails_all_1[new_item_index_all].net_save_increase<0:
+                                print 'upper_deduct_1=',upper_deduct_1
+                                if list_zakahdetails_all_1[new_item_index_all].net_save_increase<=0:
                                     total_deduct=upper_deduct_1+list_zakahdetails_all_1[new_item_index_all].net_save_increase
                                     seq_deduct(total_deduct,list_zakahdetails_all_1[:new_item_index_all])
                                 else:
+                                    print 'else'
+                                    list_zakahdetails_all_1[new_item_index_all].active_saving=net_save_increase
                                     seq_deduct(upper_deduct_1,list_zakahdetails_all_1[:new_item_index_all+1])
                             else:
                                 if total_active_saving>list_zakahdetails_all_1[new_item_index_all].net_save_increase:
@@ -482,7 +487,7 @@ def update_DB_f(request):
                                 remain_deduct = seq_deduct(deduct_f, list_zakahdetails_all_1[:new_item_index_all])
                                 list_zakahdetails_all_1[new_item_index_all].save()
                                 list_zakahdetails_all_1[new_item_index_all + 1].save()
-                            elif list_zakahdetails_all_1[new_item_index_all+1].saving>list_zakahdetails_all_1[new_item_index_all].saving and net_save_increase<0:
+                            elif list_zakahdetails_all_1[new_item_index_all+1].net_save_increase>0 and net_save_increase<0:
                                 if len(list_zakahdetails_all_1) < new_item_index_all + 3:
                                     upper_deduct = 0
                                 else:
@@ -610,7 +615,7 @@ def update_DB_f(request):
                                     list_zakahdetails_all_1[new_item_index_all].start_day=date(1111,1,1)
                                     list_zakahdetails_all_1[new_item_index_all].deserve_day=date(1111,1,1)
                                     list_zakahdetails_all_1[new_item_index_all].save()
-                            else:#no override and no reset
+                            else:#no override and no reset #no reset-->next items nesab acheived
                                 if previous_nesab_acheived and nesab_acheived and list_zakahdetails_all_1[new_item_index_all].active:
                                     list_zakahdetails_all_1[new_item_index_all].start_day = list_zakahdetails_all_1[
                                         new_item_index_all].saving_day
@@ -625,13 +630,13 @@ def update_DB_f(request):
                                                                 new_item_index_all].saving_day + timedelta(
                                                 days=354)
                                             i.save()
-                                elif not previous_nesab_acheived and not nesab_acheived and list_zakahdetails_all_1[new_item_index_all].active and next_active_item_index!=None:
+                                elif not previous_nesab_acheived and not nesab_acheived and list_zakahdetails_all_1[new_item_index_all].active: #and next_active_item_index!=None:
                                     list_zakahdetails_all_1[new_item_index_all].start_day = list_zakahdetails_all_1[
                                         next_active_item_index].start_day
                                     list_zakahdetails_all_1[new_item_index_all].deserve_day = list_zakahdetails_all_1[
                                         next_active_item_index].deserve_day
                                     list_zakahdetails_all_1[new_item_index_all].save()
-                                else:#no override & no reset & previous nesab & no nesab & next active
+                                elif previous_nesab_acheived and not nesab_acheived:#no override & no reset & previous nesab & no nesab & next active
                                     for i in list_zakahdetails_all_1[:new_item_index_all + 1]:
                                         if i.active:
                                             i.start_day = list_zakahdetails_all_1[next_active_item_index].start_day
@@ -648,10 +653,15 @@ def update_DB_f(request):
                         net_save_increase = list_zakahdetails_all_1[new_item_index_all].net_save_increase
                         if net_save_increase <= 0:
                             list_zakahdetails_all_1=set_item_inactive(list_zakahdetails_all_1, new_item_index_all)
+                        else:
+                            list_zakahdetails_all_1[new_item_index_all].active_saving = list_zakahdetails_all_1[
+                                new_item_index_all].net_save_increase
+                            list_zakahdetails_all_1[new_item_index_all].active = True
+                            list_zakahdetails_all_1[new_item_index_all].zakah = .025 * list_zakahdetails_all_1[
+                                new_item_index_all].active_saving
                         previous_nesab_acheived = list_zakahdetails_all_1[new_item_index_all - 1].nesab_acheived
 
                         #Now then all parameters of object of zakah register assigned initial values and saved
-                        #the new object added to the table
                         list_zakahdetails_1=[]
                         #create list_zakahdetails_1 which contains all active items excluding the latest item
                         for i in list_zakahdetails_all_1:
@@ -667,10 +677,6 @@ def update_DB_f(request):
                         ###############################################################################################
                         # if withdrawl deduct it from previous active saving one by one starting by latest saving date(consequently modify zakah)
                         # in same time if any active saving became 0 after deduction; modify 'active' to False, start and deserve dates to initial
-                        if list_zakahdetails_all_1[new_item_index_all].net_save_increase>0:
-                            list_zakahdetails_all_1[new_item_index_all].active_saving=list_zakahdetails_all_1[new_item_index_all].net_save_increase
-                            list_zakahdetails_all_1[new_item_index_all].active=True
-                            list_zakahdetails_all_1[new_item_index_all].zakah=.025*list_zakahdetails_all_1[new_item_index_all].active_saving
                         if override:#if override the last item
                             old_nesab_acheived = list_zakahdetails_all[new_item_index_all].nesab_acheived
                             if list_zakahdetails_all[-1].net_save_increase>=0 and net_save_increase<0:#old no deduct and new deduct
@@ -751,7 +757,6 @@ def update_DB_f(request):
                                                                                                                         list_zakahdetails_all_1[
                                                                                                                             -1],
                                                                                                       list_zakahdetails_1)
-                    print type(list_zakahdetails_all_1[new_item_index_all]),list_zakahdetails_all_1[new_item_index_all],list_zakahdetails_all_1[new_item_index_all].saving_day
                     list_zakahdetails_all_1[new_item_index_all].save()
                     updatesummary_o.total_saving=list_zakahdetails_all_1[-1].saving
                     updatesummary_o.save()

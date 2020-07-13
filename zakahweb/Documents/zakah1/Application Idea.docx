@@ -1,0 +1,9 @@
+Calculating Zakat El Mal:
+1- Client to sign-up with his account data and current total saving
+2- Client to make monthly updates of his total saving
+3- Web application to calculate and show required zakah amounts and dates
+
+Zakat El Mal is calculated to the money that satisfies 2 conditions:
+1- The total saving equals or exceeds Nesab; which is(a fixed value equivalent to 85gm of gold)
+2- A hawl (which is hejri year passed):
+The starting date of the hawl is the nearest of the two dates; Nesab acheived date and money acquiring date

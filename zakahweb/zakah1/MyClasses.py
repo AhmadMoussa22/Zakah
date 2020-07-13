@@ -78,7 +78,10 @@ class auxilary():
         object_list = sorted(object_list, key=operator.attrgetter('saving_day'), reverse=True)
         # to arrange a queryset
         for i in object_list:
-            print 222222222222222222
+            print 'date=',i.saving_day
+            print 'before='
+            print 'active_indication=',active_indication
+            print 'active_saving=',i.active_saving
             active_indication = active_indication + i.active_saving
             if active_indication <= 0:
                 print 33333333333333
@@ -92,8 +95,12 @@ class auxilary():
             else:
                 i.active_saving = active_indication
                 i.zakah = i.active_saving * .025
+                i.active=True
                 i.save()
                 break
+            print 'after='
+            print 'active_indication=', active_indication
+            print 'active_saving=', i.active_saving
         return  active_indication
 
 #update_objects
@@ -213,6 +220,7 @@ class auxilary():
                     print '3-2'
                     j=[i,i.net_save_increase-net_deduct]
                 deducted_list += [j]
+
             print 'after', 'withdrawl=', withdrawl, 'net_deduct=', net_deduct, 'saving_date=', i.saving_day
         return deducted_list#a list of lists, each sub list contains the object and the deduction(positive value)
     def list_copy_c(self,list):
@@ -225,14 +233,17 @@ class auxilary():
             print'inside return deducted loop_1'
             index = list_all.index(i[0])
             print 'brfore',list_all[index].saving_day,list_all[index].active_saving
+            reset, next_active_item_index =self.reset_nextactive_c(list_all,index)
+            if not list_all[index].active:
+                if not reset and list_all[index].nesab_acheived:
+                    list_all[index].start_day=list_all[index].saving_day
+                    list_all[index].deserve_day=list_all[index].saving_day+timedelta(days=354)
+                elif next_active_item_index!=None:
+                    list_all[index].start_day=list_all[next_active_item_index].start_day
+                    list_all[index].deserve_day=list_all[next_active_item_index].deserve_day
             list_all[index].active_saving += i[1]
-            if list_all[index].active_saving > 0:
-                list_all[index].active = True
-            else:#to be deleted; new active saving always +ve
-                list_all[index].active = False
-                list_all(index).start_day=date(1111,1,1)
-                list_all(index).deserve_day=date(1111,1,1)
-
+            list_all[index].active = True
             list_all[index].zakah = .025 * list_all[index].active_saving
             list_all[index].save()
+            print 'after', list_all[index].saving_day, list_all[index].active_saving
         return list_all

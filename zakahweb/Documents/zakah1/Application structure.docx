@@ -1,0 +1,28 @@
+Main function:
+User interface, calling other functions, and calculating overdue zakah
+
+Signin function:
+
+Signup function:
+Saves user credential data and initial saving data in the database
+
+Signout:
+
+Update database:
+1- reads monthly saving data from user
+
+2- each entry has 3 possibilities:
+2.1- First entry
+2.2- Middle entry(not first nor last)
+2.3- Last entry
+each one of the 3 previous cases has 2 cases:
+the entry is a new item, or an overrided item(correcting an existing)
+3- The function is to calculate Zakah amount and Deserve Date for each entry
+
+4- If the new item is not the last and non ovverrided, undo -if needed- previos effects
+ and recalculate new effects.
+
+5- 
+5.1- If the total saving increases; calculate zakah and deserve dates for the new entry anf -if needed- update previous
+5.2- If the total saving decreases; deduct the decrease from previous savings
+ and -if needed- update previous Zakah and Deserve datese
